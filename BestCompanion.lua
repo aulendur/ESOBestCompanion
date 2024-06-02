@@ -20,8 +20,8 @@ EVENT_MANAGER:RegisterForEvent (BestCompanion.name, EVENT_PLAYER_ACTIVATED, func
     d("BC addon found companion collectibles:")
     for idx = 1, GetTotalCollectiblesByCategoryType (COLLECTIBLE_CATEGORY_TYPE_COMPANION) do
       local id = GetCollectibleIdFromType (COLLECTIBLE_CATEGORY_TYPE_COMPANION, idx)
-      local name, _, _, _, _ = GetCollectibleInfo (id)
-      d(" * companion " .. name)
+      local name, _, _, _, unlocked = GetCollectibleInfo (id)
+      d(" * companion " .. name .. (unlocked and "" or " (locked)") )
     end
     d("That's all")
   end)
