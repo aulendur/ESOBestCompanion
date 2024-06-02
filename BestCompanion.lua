@@ -17,5 +17,11 @@ end
 EVENT_MANAGER:RegisterForEvent (BestCompanion.name, EVENT_ADD_ON_LOADED, BestCompanion.OnAddOnLoaded)
 
 EVENT_MANAGER:RegisterForEvent (BestCompanion.name, EVENT_PLAYER_ACTIVATED, function()
-    d("Hello Nirn!")
+    d("BC addon found companion collectibles:")
+    for idx = 1, GetTotalCollectiblesByCategoryType (COLLECTIBLE_CATEGORY_TYPE_COMPANION) do
+      local id = GetCollectibleIdFromType (COLLECTIBLE_CATEGORY_TYPE_COMPANION, idx)
+      local name, _, _, _, _ = GetCollectibleInfo (id)
+      d(" * companion " .. name)
+    end
+    d("That's all")
   end)
