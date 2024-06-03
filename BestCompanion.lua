@@ -27,3 +27,8 @@ function()
   end
   d("That's all")
 end)
+
+EVENT_MANAGER:RegisterForEvent (BestCompanion.name, EVENT_CRAFTING_STATION_INTERACT,
+function(event, station)
+  d("Interacting with crafting station " .. GetCraftingSkillName (GetCraftingInteractionType()))
+end)
