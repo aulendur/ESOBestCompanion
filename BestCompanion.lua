@@ -31,7 +31,7 @@ function()
   for idx = 1, GetTotalCollectiblesByCategoryType (COLLECTIBLE_CATEGORY_TYPE_COMPANION) do
     local id = GetCollectibleIdFromType (COLLECTIBLE_CATEGORY_TYPE_COMPANION, idx)
     local name, _, _, _, unlocked = GetCollectibleInfo (id)
-    d(" * companion " .. id .. ": " .. name .. (unlocked and "" or " (locked)") )
+    -- d(" * companion " .. id .. ": " .. name .. (unlocked and "" or " (locked)") )
     -- TODO: find introquest status
   end
   d("That's all")
@@ -40,4 +40,10 @@ end)
 EVENT_MANAGER:RegisterForEvent (BestCompanion.name, EVENT_CRAFTING_STATION_INTERACT,
 function(event, station)
   d("Interacting with crafting station " .. GetCraftingSkillName (GetCraftingInteractionType()))
+end)
+
+EVENT_MANAGER:RegisterForEvent (BestCompanion.name, EVENT_COMPANION_ACTIVATED,
+function()
+  local cid = GetActiveCompanionDefId()
+  d("companion summoned " .. cid)
 end)
