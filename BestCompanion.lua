@@ -37,18 +37,25 @@ function()
   end
 end)
 
+function addon.summonCompanion (companionid, wait)
+  -- TODO: wrap in check if(companion is unlocked)
+  -- TODO: wrap in check if(companion not already active)
+  zo_callLater(function()
+    UseCollectible (companionid)
+  end, wait)
+end
+
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_CRAFTING_STATION_INTERACT,
 function(event, station)
-  -- TODO: save active companion and resummon after crafting
-  -- TODO: only for provisioning
-  -- TODO: wrap in check if(Mirri is unlocked)
-  d("Interacting with crafting station " .. GetCraftingSkillName (GetCraftingInteractionType()))
   local wait = 0
-  zo_callLater(function()
-    UseCollectible(9353)
-  end, wait)
-  -- TODO: Isobel for blacksmithing
-  -- TODO: Sharp for alchemy
+  -- TODO: save active companion and resummon after crafting
+  if GetCraftingInteractionType() == CRAFTING_TYPE_ALCHEMY then
+    addon.summonCompanion (11113, wait)
+  elseif GetCraftingInteractionType() == CRAFTING_TYPE_BLACKSMITHING then
+    addon.summonCompanion (9912, wait)
+  elseif GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING then
+    addon.summonCompanion (9353, wait)
+  end
 end)
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_COMPANION_ACTIVATED,
