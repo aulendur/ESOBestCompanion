@@ -5,17 +5,26 @@ BestCompanion.name = "BestCompanion"
 -- generalized reference
 local addon = BestCompanion
 
-local companions = {
-  [9245] = "Bastian Hallix",
-  [9353] = "Mirri Elendis",
-  [9911] = "Ember",
-  [9912] = "Isobel Veloise",
-  [11113] = "Sharp-as-Night",
-  [11114] = "Azandar al-Cybiades",
-}
+--addon.Companions = {
+--  [9245] = "Bastian Hallix",
+--  [9353] = "Mirri Elendis",
+--  [9911] = "Ember",
+--  [9912] = "Isobel Veloise",
+--  [11113] = "Sharp-as-Night",
+--  [11114] = "Azandar al-Cybiades",
+--}
 
 function addon.Initialize()
-  -- Nothing to do... yet
+  addon.player_activated = 0
+  addon.Companions = {}
+  -- GetActiveCompanionDefId returns integers from 1 up to 8 as of U42
+  for i = 1, 10 do
+    local cid = GetCompanionCollectibleId (i)
+    local name, _, _, _, unlocked, _, active = GetCollectibleInfo (cid)
+    addon.Companions[i] = { name = name, unlocked = unlocked, active = active }
+  end
+  -- TODO: register introquest complete event and update companion table
+  addon.init_done = "Hello Nirn!"
 end
 
 function addon.OnAddOnLoaded (event, addonName)
@@ -34,6 +43,10 @@ function()
     local name, _, _, _, unlocked = GetCollectibleInfo (id)
     -- d(" * companion " .. id .. ": " .. name .. (unlocked and "" or " (locked)") )
     -- TODO: find introquest status
+  end
+  addon.player_activated = addon.player_activated + 1
+  if addon.player_activated == 1 then
+    d(addon.init_done)
   end
 end)
 
