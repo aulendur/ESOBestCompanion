@@ -3,6 +3,15 @@ BestCompanion = {}
 
 BestCompanion.name = "BestCompanion"
 
+local companions = {
+  [9245] = "Bastian Hallix",
+  [9353] = "Mirri Elendis",
+  [9911] = "Ember",
+  [9912] = "Isobel Veloise",
+  [11113] = "Sharp-as-Night",
+  [11114] = "Azandar al-Cybiades",
+}
+
 function BestCompanion.Initialize()
   -- Nothing to do... yet
 end
