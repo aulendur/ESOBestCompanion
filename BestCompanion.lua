@@ -60,13 +60,12 @@ function()
   addon.player_activated = addon.player_activated + 1
   if addon.player_activated == 1 then
     d(addon.init_done)
-    d(" * Companions: " .. addon.prettyprint (addon.Companions, '\n'))
+    -- d(" * Companions: " .. addon.prettyprint (addon.Companions, '\n'))
   end
 end)
 
 function addon.summonCompanion (companionid, wait)
-  if addon.Companions[companionid].unlocked then
-    -- TODO: wrap in check if(companion not already active)
+  if addon.Companions[companionid].unlocked and companionid ~= GetActiveCompanionDefId() then
     zo_callLater(function()
       UseCollectible (addon.Companions[companionid].id)
     end, wait)
