@@ -40,6 +40,52 @@ function addon.Initialize()
       addon.Companions[i] = { id = cid, name = name, unlocked = unlocked, active = active }
     end
   end
+
+  addon.lastinteraction = {}
+  ZO_PreHook(RETICLE, "TryHandlingInteraction", function(event, possible, frametimeseconds)
+    local action, name, blocked, owned, info, context, link, criminal =
+      GetGameCameraInteractableActionInfo()
+    if possible and action and 
+      (action ~= addon.lastinteraction["action"] or name ~= addon.lastinteraction["name"]) then
+      addon.lastinteraction = { action=action, name=name }
+      -- Collect, Runestone
+      -- Collect, Blessed Thistle/Bugloss/Columbine/Corn Flower/Mountain Flower
+      --   /Nightshade/Nirnroot/Water Hyacinth/Wormwood
+      -- Collect, Imp Stool/Luminous Russula/White Cap
+      -- Collect, Pure Water
+      -- Collect, Ebon Thread/Spidersilk
+      -- Cut, Hickory/Yew
+      -- Dig, Dig Mound
+      -- Examine, The Feast of Saint Coellicia IV
+      -- Examine, Alchemist Delivery Crate
+      -- Fish, Lake Fishing Hole
+      -- Mine, Copper Seam/Dwarven Ore/Ebony Ore/Electrum Seam
+      -- Open, Rawl'kha/Rawl'kha's Hideout Refuge
+      -- Pickpocket, Gellsoane
+      -- Search, Bookshelf
+      -- Search, Great Bear
+      -- Search, Heavy Sack/Trunk
+      -- Steal From, Thieves Trove
+      -- Take, Butterfly/Dragonfly/Torchbug
+      -- Talk, Mirri Elendis
+      -- Unlock, Chest
+      -- Use, Blueblood Wayshrine
+      -- Use, Alchemy Station/Cooking Fire
+      -- Use, Skyshard
+      -- Use, Chest/Hidden Treasure
+      if action == "Dig" and name == "Dig Mound" then
+        -- Summon early on so Mirri is ready when we open the actual chest
+        local wait = 0
+        addon.summonCompanion (MIRRI, wait)
+      else
+        -- d("interaction: "..tostring(frametimeseconds)..": "..
+        --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
+        --   tostring(owned)..", "..tostring(info)..", "..tostring(context)..", "..
+        --   tostring(link)..", "..tostring(criminal))
+      end
+    end
+  end)
+
   -- TODO: register introquest complete event and update companion table
   addon.init_done = "Hello Nirn!"
 end
