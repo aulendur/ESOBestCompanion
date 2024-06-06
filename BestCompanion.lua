@@ -5,14 +5,12 @@ BestCompanion.name = "BestCompanion"
 -- generalized reference
 local addon = BestCompanion
 
---addon.Companions = {
---  [9245] = "Bastian Hallix",
---  [9353] = "Mirri Elendis",
---  [9911] = "Ember",
---  [9912] = "Isobel Veloise",
---  [11113] = "Sharp-as-Night",
---  [11114] = "Azandar al-Cybiades",
---}
+local BASTIAN = 1
+local MIRRI   = 2
+local EMBER   = 5
+local ISOBEL  = 6
+local SHARP   = 8
+local AZANDAR = 9
 
 function addon.prettyprint (ref, pre, post)
   if type (ref) == 'table' then
@@ -59,8 +57,7 @@ EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_PLAYER_ACTIVATED,
 function()
   addon.player_activated = addon.player_activated + 1
   if addon.player_activated == 1 then
-    d(addon.init_done)
-    -- d(" * Companions: " .. addon.prettyprint (addon.Companions, '\n'))
+    -- d(addon.init_done)
   end
 end)
 
@@ -70,7 +67,7 @@ function addon.summonCompanion (companionid, wait)
       UseCollectible (addon.Companions[companionid].id)
     end, wait)
   else
-    d("Companion " .. companionid .. " is not unlocked")
+    -- TODO: alert if the companion is available but introquest hasn't been completed
   end
 end
 
@@ -79,11 +76,11 @@ function(event, station)
   local wait = 0
   -- TODO: save active companion and resummon after crafting
   if GetCraftingInteractionType() == CRAFTING_TYPE_ALCHEMY then
-    addon.summonCompanion (8, wait)
+    addon.summonCompanion (SHARP, wait)
   elseif GetCraftingInteractionType() == CRAFTING_TYPE_BLACKSMITHING then
-    addon.summonCompanion (6, wait)
+    addon.summonCompanion (ISOBEL, wait)
   elseif GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING then
-    addon.summonCompanion (2, wait)
+    addon.summonCompanion (MIRRI, wait)
   end
 end)
 
@@ -91,5 +88,4 @@ EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_COMPANION_ACTIVATED,
 function()
   local cid = GetActiveCompanionDefId()
   -- d("companion summoned " .. cid)
-  -- Bastian = 1, Mirri = 2, Ember = 5, Isobel = 6, Sharp = 8, Azandar = 9
 end)
