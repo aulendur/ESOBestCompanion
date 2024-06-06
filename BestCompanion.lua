@@ -58,6 +58,7 @@ function addon.Initialize()
       -- Dig, Dig Mound
       -- Examine, The Feast of Saint Coellicia IV
       -- Examine, Alchemist Delivery Crate
+      -- Excavate, Dig Site
       -- Fish, Lake Fishing Hole
       -- Mine, Copper Seam/Dwarven Ore/Ebony Ore/Electrum Seam
       -- Open, Rawl'kha/Rawl'kha's Hideout Refuge
@@ -86,6 +87,12 @@ function addon.Initialize()
     end
   end)
 
+  SCENE_MANAGER:GetScene("antiquityDigging"):RegisterCallback("StateChange",
+  function(old, new)
+    if (new == SCENE_SHOWN) then
+      addon.summonCompanion (MIRRI, wait)
+    end
+  end)
   -- TODO: register introquest complete event and update companion table
   addon.init_done = "Hello Nirn!"
 end
