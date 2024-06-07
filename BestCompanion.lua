@@ -87,12 +87,20 @@ function addon.Initialize()
     end
   end)
 
+  SCENE_MANAGER:GetScene("Scrying"):RegisterCallback("StateChange",
+  function(old, new)
+    if (new == SCENE_SHOWN) then
+      addon.summonCompanion (BASTIAN, wait)
+    end
+  end)
+
   SCENE_MANAGER:GetScene("antiquityDigging"):RegisterCallback("StateChange",
   function(old, new)
     if (new == SCENE_SHOWN) then
       addon.summonCompanion (MIRRI, wait)
     end
   end)
+
   -- TODO: register introquest complete event and update companion table
   addon.init_done = "Hello Nirn!"
 end
