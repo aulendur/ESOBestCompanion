@@ -74,9 +74,15 @@ function addon.Initialize()
       -- Use, Alchemy Station/Cooking Fire
       -- Use, Skyshard
       -- Use, Chest/Hidden Treasure
+
+      local wait = 0
+
       if action == "Dig" and name == "Dig Mound" then
         -- Summon early on so Mirri is ready when we open the actual chest
-        local wait = 0
+        addon.summonCompanion (MIRRI, wait)
+      elseif action == "Steal From" and name == "Thieves Trove" then
+        addon.summonCompanion (MIRRI, wait)
+      elseif action == "Unlock" and name == "Chest" then
         addon.summonCompanion (MIRRI, wait)
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
