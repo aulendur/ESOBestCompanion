@@ -27,17 +27,19 @@ end
 function addon.Initialize()
   addon.player_activated = 0
   addon.Companions = {}
-  -- GetActiveCompanionDefId returns integers from 1 up to 8 as of U42
+  -- GetActiveCompanionDefId returns integers from 1 up to 9 as of U42
   for i = 1, 10 do
     local cid = GetCompanionCollectibleId (i)
     if cid > 0 then
       local name, _, _, _, unlocked, _, active = GetCollectibleInfo (cid)
-      local qid = GetCompanionIntroQuestId (cid)
-      local qnm, _ = GetCompletedQuestInfo (qid)
-      if not qnm then
-        unlocked = false
-      end
-      addon.Companions[i] = { id = cid, name = name, unlocked = unlocked, active = active }
+      local qid = GetCompanionIntroQuestId (i)
+      local introname, _ = GetCompletedQuestInfo (qid)
+      --zo_callLater(function()
+      --  d(name .. " unlocked: " .. tostring(unlocked))
+      --  d("  intro: ".. tostring(introname) .. ", questid: " .. tostring(qid))
+      --  end, 5)
+      addon.Companions[i] = { id = cid, name = name, unlocked = unlocked,
+        introdone = (introname ~= "" and true or false), active = active, nagplayer = true }
     end
   end
 
@@ -55,7 +57,6 @@ function addon.Initialize()
       -- Collect, Pure Water
       -- Collect, Ebon Thread/Spidersilk
       -- Cut, Hickory/Yew
-      -- Dig, Dig Mound
       -- Examine, The Feast of Saint Coellicia IV
       -- Examine, Alchemist Delivery Crate
       -- Excavate, Dig Site
@@ -66,10 +67,8 @@ function addon.Initialize()
       -- Search, Bookshelf
       -- Search, Great Bear
       -- Search, Heavy Sack/Trunk
-      -- Steal From, Thieves Trove
       -- Take, Butterfly/Dragonfly/Torchbug
       -- Talk, Mirri Elendis
-      -- Unlock, Chest
       -- Use, Blueblood Wayshrine
       -- Use, Alchemy Station/Cooking Fire
       -- Use, Skyshard
@@ -90,6 +89,14 @@ function addon.Initialize()
         --   tostring(owned)..", "..tostring(info)..", "..tostring(context)..", "..
         --   tostring(link)..", "..tostring(criminal))
       end
+    end
+  end)
+
+  SCENE_MANAGER:GetScene("lockpickKeyboard"):RegisterCallback("StateChange",
+  function(old, new)
+    if (new == SCENE_SHOWN) then
+      -- TODO: find out if we can detect chest vs. something else here and move
+      -- Mirri summoning, or otherwise just unsummon if it's Bastian
     end
   end)
 
@@ -129,12 +136,18 @@ function()
 end)
 
 function addon.summonCompanion (companionid, wait)
-  if addon.Companions[companionid].unlocked and companionid ~= GetActiveCompanionDefId() then
+  if addon.Companions[companionid].unlocked and addon.Companions[companionid].introdone
+    and companionid ~= GetActiveCompanionDefId() then
     zo_callLater(function()
       UseCollectible (addon.Companions[companionid].id)
     end, wait)
+  elseif addon.Companions[companionid].unlocked and not addon.Companions[companionid].introdone then
+    if addon.Companions[companionid].nagplayer then
+      d(addon.Companions[companionid].name .. " is unlocked but you have not completed their quest")
+      addon.Companions[companionid].nagplayer = false
+    end
   else
-    -- TODO: alert if the companion is available but introquest hasn't been completed
+    -- pass
   end
 end
 
