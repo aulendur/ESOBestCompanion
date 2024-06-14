@@ -79,6 +79,8 @@ function addon.Initialize()
       if action == "Dig" and name == "Dig Mound" then
         -- Summon early on so Mirri is ready when we open the actual chest
         addon.summonCompanion (MIRRI, wait)
+      elseif action "Loot" and name == "Psijic Portal" then
+        addon.SummonCompanion (BASTIAN, wait)
       elseif action == "Steal From" and name == "Thieves Trove" then
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Unlock" and name == "Chest" then
