@@ -81,7 +81,7 @@ function addon.Initialize()
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
-      elseif action == "Steal From" and name == "Thieves Trove" then
+      elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Unlock" and name == "Chest" then
         addon.summonCompanion (MIRRI, wait)
