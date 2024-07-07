@@ -81,6 +81,11 @@ function addon.Initialize()
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
+      elseif action == "Take" and GetActiveCompanionDefId() == MIRRI and
+        (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then
+        EndPendingInteraction()
+        addon.lastinteraction = {}
+        return true
       elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Unlock" and name == "Chest" then
