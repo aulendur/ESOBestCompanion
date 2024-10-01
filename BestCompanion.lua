@@ -58,12 +58,13 @@ function addon.Initialize()
       -- Collect, Pure Water
       -- Collect, Ebon Thread/Spidersilk
       -- Cut, Hickory/Yew
+      -- Enter, Snugpod/...
       -- Examine, The Feast of Saint Coellicia IV
       -- Examine, Alchemist Delivery Crate
       -- Excavate, Dig Site
       -- Fish, Lake Fishing Hole
       -- Mine, Copper Seam/Dwarven Ore/Ebony Ore/Electrum Seam
-      -- Open, Rawl'kha/Rawl'kha's Hideout Refuge
+      -- Open, Rawl'kha/Stormhold/Wayrest/...
       -- Pickpocket, Gellsoane
       -- Search, Bookshelf
       -- Search, Great Bear
@@ -82,13 +83,17 @@ function addon.Initialize()
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
+      elseif action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then
+        -- unsummon straight away
+        -- we could summon Ember instead if she is available
+        UseCollectible (addon.Companions[ISOBEL].id)
+      elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
+        addon.summonCompanion (MIRRI, wait)
       elseif action == "Take" and GetActiveCompanionDefId() == MIRRI and
         (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then
         EndPendingInteraction()
         addon.lastinteraction = {}
         return true
-      elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
-        addon.summonCompanion (MIRRI, wait)
       elseif action == "Unlock" and name == "Chest" then
         addon.summonCompanion (MIRRI, wait)
       else
