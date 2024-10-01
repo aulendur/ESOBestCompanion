@@ -44,6 +44,7 @@ function addon.Initialize()
   end
 
   addon.lastinteraction = {}
+  addon.lastcompanion = false
   ZO_PreHook(RETICLE, "TryHandlingInteraction", function(event, possible, frametimeseconds)
     local action, name, blocked, owned, info, context, link, criminal =
       GetGameCameraInteractableActionInfo()
@@ -145,9 +146,15 @@ end)
 function addon.summonCompanion (companionid, wait)
   if addon.Companions[companionid].unlocked and addon.Companions[companionid].introdone
     and companionid ~= GetActiveCompanionDefId() then
-    zo_callLater(function()
-      UseCollectible (addon.Companions[companionid].id)
-    end, wait)
+    addon.lastcompanion = GetActiveCompanionDefId()
+    if HasBlockedCompanion() then
+      -- Full group, Cyro/IC, ...
+      -- d("|BC| Companion blocked, cannot summon")
+    else
+      zo_callLater(function()
+        UseCollectible (addon.Companions[companionid].id)
+      end, wait)
+    end
   elseif addon.Companions[companionid].unlocked and not addon.Companions[companionid].introdone then
     if addon.Companions[companionid].nagplayer then
       d(addon.Companions[companionid].name .. " is unlocked but you have not completed their quest")
@@ -169,6 +176,11 @@ function(event, station)
   elseif GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING then
     addon.summonCompanion (MIRRI, wait)
   end
+end)
+
+EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_END_CRAFTING_STATION_INTERACT,
+function(event, station)
+  -- 
 end)
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_COMPANION_ACTIVATED,
