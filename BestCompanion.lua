@@ -63,7 +63,6 @@ function addon.Initialize()
       -- Cut, Hickory/Yew
       -- Enter, Snugpod/...
       -- Examine, The Feast of Saint Coellicia IV
-      -- Examine, Alchemist Delivery Crate
       -- Excavate, Dig Site
       -- Fish, Lake Fishing Hole
       -- Mine, Copper Seam/Dwarven Ore/Ebony Ore/Electrum Seam
@@ -87,6 +86,8 @@ function addon.Initialize()
         else
           addon.summonCompanion (MIRRI, wait)
         end
+      elseif action == "Examine" and name == "Alchemist Delivery Crate" then
+        addon.summonCompanion (TANLORIN, wait)
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
       elseif action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then
