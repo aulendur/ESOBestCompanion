@@ -75,7 +75,6 @@ function addon.Initialize()
       -- Talk, Mirri Elendis
       -- Use, Blueblood Wayshrine
       -- Use, Alchemy Station/Cooking Fire
-      -- Use, Skyshard
       -- Use, Chest/Hidden Treasure
 
       local wait = 0
@@ -115,6 +114,8 @@ function addon.Initialize()
         return true
       elseif action == "Unlock" and name == "Chest" then
         addon.summonCompanion (MIRRI, wait)
+      elseif action == "Use" and name == "Skyshard" then
+        addon.summonCompanion (TANLORIN, wait)
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
