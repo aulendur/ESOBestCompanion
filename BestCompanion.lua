@@ -95,7 +95,11 @@ function addon.Initialize()
         -- we could summon Ember instead if she is available
         UseCollectible (addon.Companions[ISOBEL].id)
       elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
-        addon.summonCompanion (MIRRI, wait)
+        if not IsPlayerMoving() then
+          addon.summonCompanion (MIRRI, wait)
+        else
+          addon.lastinteraction = {}
+        end
       elseif action == "Take" and GetActiveCompanionDefId() == MIRRI and
         (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then
         EndPendingInteraction()
