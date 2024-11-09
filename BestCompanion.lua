@@ -90,10 +90,18 @@ function addon.Initialize()
         addon.summonCompanion (TANLORIN, wait)
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
-      elseif action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then
-        -- unsummon straight away
-        -- we could summon Ember instead if she is available
-        UseCollectible (addon.Companions[ISOBEL].id)
+      elseif action == "Open" then
+        if name:match ("Mages Guild Hall") then
+          if addon.Companions[BASTIAN].introdone then
+            addon.summonCompanion (BASTIAN)
+          elseif GetActiveCompanionDefId() == TANLORIN then
+            UseCollectible (addon.Companions[TANLORIN].id)
+          end
+        elseif name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then
+          -- unsummon straight away
+          -- we could summon Ember instead if she is available
+          UseCollectible (addon.Companions[ISOBEL].id)
+        end
       elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
         if not IsPlayerMoving() then
           addon.summonCompanion (MIRRI, wait)
