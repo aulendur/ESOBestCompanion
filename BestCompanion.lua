@@ -82,8 +82,11 @@ function addon.Initialize()
       local wait = 0
 
       if action == "Dig" and name == "Dirt Mound" then
-        -- Summon early on so Mirri is ready when we open the actual chest
-        addon.summonCompanion (MIRRI, wait)
+        if addon.Companions[SHARP].introdone then
+          addon.summonCompanion (SHARP, wait)
+        else
+          addon.summonCompanion (MIRRI, wait)
+        end
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
       elseif action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then
