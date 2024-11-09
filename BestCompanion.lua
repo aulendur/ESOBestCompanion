@@ -86,6 +86,11 @@ function addon.Initialize()
         end
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
         addon.summonCompanion (TANLORIN, wait)
+        -- disable temporarily so the companion has time to appear
+        if addon.Companions[TANLORIN].introdone and GetActiveCompanionDefId() ~= TANLORIN then
+          EndPendingInteraction()
+          addon.lastinteraction = {}
+        end
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
       elseif action == "Open" then
@@ -117,6 +122,11 @@ function addon.Initialize()
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Use" and name == "Skyshard" then
         addon.summonCompanion (TANLORIN, wait)
+        -- disable temporarily so the companion has time to appear
+        if addon.Companions[TANLORIN].introdone and GetActiveCompanionDefId() ~= TANLORIN then
+          EndPendingInteraction()
+          addon.lastinteraction = {}
+        end
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
@@ -176,6 +186,8 @@ function addon.summonCompanion (companionid, wait)
     if HasBlockedCompanion() then
       -- Full group, Cyro/IC, ...
       -- d("|BC| Companion blocked, cannot summon")
+    elseif HasPendingCompanion() then
+      -- summon in progress, do nothing
     else
       zo_callLater(function()
         UseCollectible (addon.Companions[companionid].id)
