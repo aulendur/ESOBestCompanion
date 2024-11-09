@@ -11,6 +11,8 @@ local EMBER   = 5
 local ISOBEL  = 6
 local SHARP   = 8
 local AZANDAR = 9
+local TANLORIN  = 12
+local ZERITHVAR = 13
 
 function addon.prettyprint (ref, pre, post)
   if type (ref) == 'table' then
@@ -27,15 +29,16 @@ end
 function addon.Initialize()
   addon.player_activated = 0
   addon.Companions = {}
-  -- GetActiveCompanionDefId returns integers from 1 up to 9 as of U42
-  for i = 1, 10 do
+  -- GetActiveCompanionDefId returns integers from 1 up to 13 as of U44
+  for i = 1, 20 do
     local cid = GetCompanionCollectibleId (i)
     if cid > 0 then
+      -- Unlocked does not mean what you'd think...
       local name, _, _, _, unlocked, _, active = GetCollectibleInfo (cid)
       local qid = GetCompanionIntroQuestId (i)
       local introname, _ = GetCompletedQuestInfo (qid)
-      --zo_callLater(function()
-      --  d(name .. " unlocked: " .. tostring(unlocked))
+      -- zo_callLater(function()
+      --  d(name .. " companiondefid " .. tostring(i) .. " unlocked: " .. tostring(unlocked))
       --  d("  intro: ".. tostring(introname) .. ", questid: " .. tostring(qid))
       --  end, 5)
       addon.Companions[i] = { id = cid, name = name, unlocked = unlocked,
