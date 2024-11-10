@@ -71,7 +71,6 @@ function addon.Initialize()
       -- Search, Bookshelf
       -- Search, Great Bear
       -- Search, Heavy Sack/Trunk
-      -- Take, Butterfly/Dragonfly/Torchbug
       -- Talk, Mirri Elendis
       -- Use, Blueblood Wayshrine
       -- Use, Alchemy Station/Cooking Fire
@@ -86,11 +85,7 @@ function addon.Initialize()
         end
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
         addon.summonCompanion (TANLORIN, wait)
-        -- disable temporarily so the companion has time to appear
-        if addon.Companions[TANLORIN].introdone and GetActiveCompanionDefId() ~= TANLORIN then
-          EndPendingInteraction()
-          addon.lastinteraction = {}
-        end
+        addon.PauseInteraction{TANLORIN}
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
       elseif action == "Open" then
@@ -120,13 +115,10 @@ function addon.Initialize()
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") then
         addon.summonCompanion (MIRRI, wait)
+        addon.PauseInteraction{MIRRI}
       elseif action == "Use" and name == "Skyshard" then
         addon.summonCompanion (TANLORIN, wait)
-        -- disable temporarily so the companion has time to appear
-        if addon.Companions[TANLORIN].introdone and GetActiveCompanionDefId() ~= TANLORIN then
-          EndPendingInteraction()
-          addon.lastinteraction = {}
-        end
+        addon.PauseInteraction{TANLORIN}
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
@@ -160,6 +152,15 @@ function addon.Initialize()
 
   -- TODO: register introquest complete event and update companion table
   addon.init_done = "Hello Nirn!"
+end
+
+function addon.PauseInteraction (t)
+  setmetatable (t,{__index={interaction={}}})
+  local companion, interaction = t[1] or t.companion, t[2] or t.interaction
+  if addon.Companions[companion].introdone and GetActiveCompanionDefId() ~= companion then
+    EndPendingInteraction()
+    addon.lastinteraction = interaction
+  end
 end
 
 function addon.OnAddOnLoaded (event, addonName)
