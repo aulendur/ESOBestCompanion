@@ -111,9 +111,9 @@ function addon.Initialize()
         EndPendingInteraction()
         addon.lastinteraction = {}
         return true
-      elseif action == "Unlock" and name == "Chest" then
+      elseif action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
         addon.summonCompanion (MIRRI, wait)
-      elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") then
+      elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then
         addon.summonCompanion (MIRRI, wait)
         addon.PauseInteraction{MIRRI}
       elseif action == "Use" and name == "Skyshard" then
