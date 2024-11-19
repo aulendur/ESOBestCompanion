@@ -84,8 +84,9 @@ function addon.Initialize()
           addon.summonCompanion (MIRRI, wait)
         end
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
-        addon.summonCompanion (TANLORIN, wait)
-        addon.PauseInteraction{TANLORIN}
+        if addon.summonCompanion (TANLORIN, wait) then
+          addon.PauseInteraction{TANLORIN}
+        end
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
       elseif action == "Open" then
@@ -114,11 +115,13 @@ function addon.Initialize()
       elseif action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then
-        addon.summonCompanion (MIRRI, wait)
-        addon.PauseInteraction{MIRRI}
+        if addon.summonCompanion (MIRRI, wait) then
+          addon.PauseInteraction{MIRRI}
+        end
       elseif action == "Use" and name == "Skyshard" then
-        addon.summonCompanion (TANLORIN, wait)
-        addon.PauseInteraction{TANLORIN}
+        if addon.summonCompanion (TANLORIN, wait) then
+          addon.PauseInteraction{TANLORIN}
+        end
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
@@ -193,6 +196,7 @@ function addon.summonCompanion (companionid, wait)
       zo_callLater(function()
         UseCollectible (addon.Companions[companionid].id)
       end, wait)
+      return true
     end
   elseif addon.Companions[companionid].unlocked and not addon.Companions[companionid].introdone then
     if addon.Companions[companionid].nagplayer then
@@ -202,6 +206,7 @@ function addon.summonCompanion (companionid, wait)
   else
     -- pass
   end
+  return false
 end
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_CRAFTING_STATION_INTERACT,
