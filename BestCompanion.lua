@@ -155,6 +155,7 @@ function addon.Initialize()
 
   -- TODO: register introquest complete event and update companion table
   addon.init_done = "Hello Nirn!"
+  addon.lastsummon = GetGameTimeMilliseconds()
 end
 
 function addon.PauseInteraction (t)
@@ -184,7 +185,9 @@ function()
 end)
 
 function addon.summonCompanion (companionid, wait)
-  if addon.Companions[companionid].unlocked and addon.Companions[companionid].introdone
+  if (GetGameTimeMilliseconds() - addon.lastsummon) < 5000 then
+    -- don't do anything if we attempted a summon in the last five seconds
+  elseif addon.Companions[companionid].unlocked and addon.Companions[companionid].introdone
     and companionid ~= GetActiveCompanionDefId() then
     addon.lastcompanion = GetActiveCompanionDefId()
     if HasBlockedCompanion() then
@@ -193,6 +196,8 @@ function addon.summonCompanion (companionid, wait)
     elseif HasPendingCompanion() then
       -- summon in progress, do nothing
     else
+      -- all clear, try a summon
+      addon.lastsummon = GetGameTimeMilliseconds()
       zo_callLater(function()
         UseCollectible (addon.Companions[companionid].id)
       end, wait)
