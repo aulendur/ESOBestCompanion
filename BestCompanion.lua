@@ -86,9 +86,8 @@ function addon.Initialize()
           addon.summonCompanion (MIRRI, wait)
         end
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
-        if addon.summonCompanion (TANLORIN, wait) then
-          addon.PauseInteraction{TANLORIN}
-        end
+        addon.summonCompanion (TANLORIN, wait)
+        return addon.PauseInteraction{TANLORIN}
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
       elseif action == "Open" then
@@ -121,9 +120,8 @@ function addon.Initialize()
           addon.PauseInteraction{MIRRI}
         end
       elseif action == "Use" and name == "Skyshard" then
-        if addon.summonCompanion (TANLORIN, wait) then
-          addon.PauseInteraction{TANLORIN}
-        end
+        addon.summonCompanion (TANLORIN, wait)
+        return addon.PauseInteraction{TANLORIN}
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
@@ -163,9 +161,15 @@ end
 function addon.PauseInteraction (t)
   setmetatable (t,{__index={interaction={}}})
   local companion, interaction = t[1] or t.companion, t[2] or t.interaction
-  if addon.Companions[companion].introdone and GetActiveCompanionDefId() ~= companion then
-    EndPendingInteraction()
-    addon.lastinteraction = interaction
+  if not HasBlockedCompanion() and not DoesCurrentZoneHaveTelvarStoneBehavior() and not IsInCyrodiil() then
+    if addon.Companions[companion].introdone and GetActiveCompanionDefId() ~= companion then
+      --d("Waiting for "..companion..", pausing interaction '"..addon.prettyprint(interaction).."'")
+      EndPendingInteraction()
+      addon.lastinteraction = interaction
+      return true
+    end
+  else
+    --d("|BC| Companion blocked, cannot summon")
   end
 end
 
