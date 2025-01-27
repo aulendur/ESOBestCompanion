@@ -77,7 +77,9 @@ function addon.Initialize()
 
       local wait = 0
 
-      if action == "Dig" and name == "Dirt Mound" then
+      if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == TANLORIN then
+        UseCollectible (addon.Companions[TANLORIN].id)
+      elseif action == "Dig" and name == "Dirt Mound" then
         if addon.Companions[SHARP].introdone then
           addon.summonCompanion (SHARP, wait)
         else
