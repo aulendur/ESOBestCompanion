@@ -29,6 +29,7 @@ end
 function addon.Initialize()
   addon.player_activated = 0
   addon.Companions = {}
+  addon.IntroQuests = {}
   -- GetActiveCompanionDefId returns integers from 1 up to 13 as of U44
   for i = 1, 20 do
     local cid = GetCompanionCollectibleId (i)
@@ -43,6 +44,11 @@ function addon.Initialize()
       --  end, 5)
       addon.Companions[i] = { id = cid, name = name, unlocked = unlocked,
         introdone = (introname ~= "" and true or false), active = active, nagplayer = true }
+      -- /script for i = 1,20 do n,_ = GetQuestName(GetCompanionIntroQuestId(i)); if n~="" then d(i.." questname="..n); end; end
+      local questname = GetQuestName (qid)
+      if questname ~= "" then
+        addon.IntroQuests[questname] = i
+      end
     end
   end
 
@@ -153,7 +159,6 @@ function addon.Initialize()
     end
   end)
 
-  -- TODO: register introquest complete event and update companion table
   addon.init_done = "Hello Nirn!"
   addon.lastsummon = GetGameTimeMilliseconds()
 end
@@ -242,4 +247,16 @@ EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_COMPANION_ACTIVATED,
 function()
   local cid = GetActiveCompanionDefId()
   -- d("companion summoned " .. cid)
+end)
+
+EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_QUEST_COMPLETE,
+function(event, questname, _, _, _, _, questtype, displaytype)
+  -- d("finished quest "..questname..", type "..tostring(questtype)..", display "..tostring(displaytype))
+  -- d("finished quest '"..questname.."' is companionintro: "..tostring(addon.IntroQuests[questname]~=nil))
+  id = addon.IntroQuests[questname]
+  if id ~= nil then
+    addon.Companions[id].introdone = true
+    addon.Companions[id].nagplayer = false
+    d("Congratulations, completed intro for "..addon.Companions[id].name)
+  end
 end)
