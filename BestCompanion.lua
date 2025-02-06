@@ -88,8 +88,10 @@ function addon.Initialize()
       elseif action == "Dig" and name == "Dirt Mound" then
         if addon.Companions[SHARP].introdone then
           addon.summonCompanion (SHARP, wait)
+          return addon.PauseInteraction{SHARP}
         else
           addon.summonCompanion (MIRRI, wait)
+          return addon.PauseInteraction{MIRRI}
         end
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
         addon.summonCompanion (TANLORIN, wait)
@@ -122,9 +124,8 @@ function addon.Initialize()
       elseif action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then
-        if addon.summonCompanion (MIRRI, wait) then
-          addon.PauseInteraction{MIRRI}
-        end
+        addon.summonCompanion (MIRRI, wait)
+        return addon.PauseInteraction{MIRRI}
       elseif action == "Use" and name == "Skyshard" then
         addon.summonCompanion (TANLORIN, wait)
         return addon.PauseInteraction{TANLORIN}
