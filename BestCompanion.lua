@@ -160,6 +160,13 @@ function addon.Initialize()
     end
   end)
 
+  SCENE_MANAGER:GetScene("scribingKeyboard"):RegisterCallback("StateChange",
+  function(old, new)
+    if (new == SCENE_SHOWN) then
+      addon.summonCompanion (TANLORIN, wait)
+    end
+  end)
+
   addon.init_done = "Hello Nirn!"
   addon.lastsummon = GetGameTimeMilliseconds()
 end
