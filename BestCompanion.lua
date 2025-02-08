@@ -96,6 +96,9 @@ function addon.Initialize()
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
         addon.summonCompanion (TANLORIN, wait)
         return addon.PauseInteraction{TANLORIN}
+      elseif action == "Examine" and not name:match (' Crate') and GetActiveCompanionDefId() == TANLORIN then
+        -- TODO: link is nil, figure out a way to find out if we're looking at a mages lorebook
+        UseCollectible (addon.Companions[TANLORIN].id)
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
       elseif action == "Open" then
