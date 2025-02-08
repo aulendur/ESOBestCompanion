@@ -207,7 +207,7 @@ function()
 end)
 
 function addon.summonCompanion (companionid, wait)
-  if (GetGameTimeMilliseconds() - addon.lastsummon) < 5000 then
+  if (GetGameTimeMilliseconds() - addon.lastsummon) < 6000 then
     -- don't do anything if we attempted a summon in the last five seconds
   elseif addon.Companions[companionid].unlocked and addon.Companions[companionid].introdone
     and companionid ~= GetActiveCompanionDefId() then
