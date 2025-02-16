@@ -119,11 +119,17 @@ function addon.Initialize()
         else
           addon.lastinteraction = {}
         end
-      elseif action == "Take" and GetActiveCompanionDefId() == MIRRI and
-        (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then
-        EndPendingInteraction()
-        addon.lastinteraction = {}
-        return true
+      elseif action == "Take" then
+        if GetActiveCompanionDefId() == MIRRI and
+           (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then
+          EndPendingInteraction()
+          addon.lastinteraction = {}
+          return true
+        elseif name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or
+               name:match ('^Signature Script: ') then
+          addon.summonCompanion (TANLORIN, wait)
+          return addon.PauseInteraction{TANLORIN}
+        end
       elseif action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
         addon.summonCompanion (MIRRI, wait)
       elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then
