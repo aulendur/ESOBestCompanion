@@ -26,10 +26,27 @@ function addon.prettyprint (ref, pre, post)
   end
 end
 
+function addon.loadShalidorBooks()
+  -- /script d(tostring(GetLoreBookIndicesFromBookId(0))) -- 0, 1, 10, 100 => nil, nil, nil, 3
+  -- /script for i = 0, 20 do local name, num, cid = GetLoreCategoryInfo(i); if name then d(tostring(i, name, num, cid)); end; end
+  -- Shalidor's library is i=1
+  -- /script local n = 0; for i = 0, 6000 do local cat, coll, idx = GetLoreBookIndicesFromBookId(i); if cat == 1 then local title, _, _, id = GetLoreBookInfo (cat, coll, idx); d(i.."/"..id.." : "..title); n = n + 1; end; end; d("Total Shalidor books: "..n) -- total 297, highest id = 2293 Joseph the Intolerant
+  for i = 0, 6339 do -- 6339 books listed in Lore Library tab as of U44
+    local cat, coll, idx = GetLoreBookIndicesFromBookId(i)
+    if cat == 1 then
+      local title, _, _, id = GetLoreBookInfo (cat, coll, idx)
+      assert (i==id, "BC: Mismatch between Shalidor book i and id")
+      addon.ShalidorBooks[title] = id
+    end
+  end
+end
+
 function addon.Initialize()
   addon.player_activated = 0
   addon.Companions = {}
   addon.IntroQuests = {}
+  addon.ShalidorBooks = {}
+  addon.loadShalidorBooks()
   -- GetActiveCompanionDefId returns integers from 1 up to 13 as of U44
   for i = 1, 20 do
     local cid = GetCompanionCollectibleId (i)
@@ -96,8 +113,8 @@ function addon.Initialize()
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
         addon.summonCompanion (TANLORIN, wait)
         return addon.PauseInteraction{TANLORIN}
-      elseif action == "Examine" and not name:match (' Crate') and GetActiveCompanionDefId() == TANLORIN then
-        -- TODO: link is nil, figure out a way to find out if we're looking at a mages lorebook
+      elseif action == "Examine" and GetActiveCompanionDefId() == TANLORIN and
+             addon.ShalidorBooks[name] ~= nil then
         UseCollectible (addon.Companions[TANLORIN].id)
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
