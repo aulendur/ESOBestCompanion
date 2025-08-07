@@ -113,6 +113,9 @@ function addon.Initialize()
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
         addon.summonCompanion (TANLORIN, wait)
         return addon.PauseInteraction{TANLORIN}
+      elseif action == "Examine" and name == "Enchanter Delivery Crate" then
+        addon.summonCompanion (AZANDAR, wait)
+        return addon.PauseInteraction{AZANDAR}
       elseif action == "Examine" and GetActiveCompanionDefId() == TANLORIN and
              addon.ShalidorBooks[name] ~= nil then
         UseCollectible (addon.Companions[TANLORIN].id)
