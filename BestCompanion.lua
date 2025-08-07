@@ -119,7 +119,7 @@ function addon.Initialize()
       elseif action == "Loot" and name == "Psijic Portal" then
         addon.summonCompanion (BASTIAN, wait)
       elseif action == "Open" then
-        if name:match ("Mages Guild Hall") then
+        if name:match ("^Mages Guild") then
           if addon.Companions[BASTIAN].introdone then
             addon.summonCompanion (BASTIAN)
           elseif GetActiveCompanionDefId() == TANLORIN then
