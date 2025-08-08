@@ -128,10 +128,13 @@ function addon.Initialize()
           elseif GetActiveCompanionDefId() == TANLORIN then
             UseCollectible (addon.Companions[TANLORIN].id)
           end
-        elseif name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then
-          -- unsummon straight away
-          -- we could summon Ember instead if she is available
-          UseCollectible (addon.Companions[ISOBEL].id)
+        elseif name:match (' Refuge$') then
+          if addon.Companions[EMBER].introdone then
+            addon.summonCompanion (EMBER)
+          elseif GetActiveCompanionDefId() == ISOBEL then
+            UseCollectible (addon.Companions[ISOBEL].id)
+          end
+        -- elseif IsInOutlawZone() and last companion was Isobel then resummon after exit
         end
       elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
         if not IsPlayerMoving() then
