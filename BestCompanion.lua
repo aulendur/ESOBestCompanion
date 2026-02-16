@@ -80,7 +80,6 @@ function addon.Initialize()
       -- Collect, Runestone
       -- Collect, Blessed Thistle/Bugloss/Columbine/Corn Flower/Mountain Flower
       --   /Nightshade/Nirnroot/Water Hyacinth/Wormwood
-      -- Collect, Imp Stool/Luminous Russula/White Cap
       -- Collect, Pure Water
       -- Collect, Ebon Thread/Spidersilk
       -- Cut, Hickory/Yew
@@ -102,6 +101,11 @@ function addon.Initialize()
 
       if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == TANLORIN then
         UseCollectible (addon.Companions[TANLORIN].id)
+      elseif action == "Collect" and (
+             --name == "Imp Stool" or name == "White Cap"
+             name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot") and
+             GetActiveCompanionDefId() == AZANDAR then
+        UseCollectible (addon.Companions[AZANDAR].id)
       elseif action == "Dig" and name == "Dirt Mound" then
         if addon.Companions[SHARP].introdone then
           addon.summonCompanion (SHARP, wait)
