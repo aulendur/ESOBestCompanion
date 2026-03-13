@@ -60,7 +60,7 @@ function addon.Initialize()
       --  d("  intro: ".. tostring(introname) .. ", questid: " .. tostring(qid))
       --  end, 5)
       addon.Companions[i] = { id = cid, name = name, unlocked = unlocked,
-        introdone = (introname ~= "" and true or false), active = active, nagplayer = true }
+        introdone = (introname ~= "" and true or false), active = active, nagplayer = true, rapport = 0 }
       -- /script for i = 1,20 do n,_ = GetQuestName(GetCompanionIntroQuestId(i)); if n~="" then d(i.." questname="..n); end; end
       local questname = GetQuestName (qid)
       if questname ~= "" then
@@ -241,7 +241,22 @@ function()
   if addon.player_activated == 1 then
     -- d(addon.init_done)
   end
+  addon.updateCompanionRapport()
 end)
+
+ZO_PreHook("UseCollectible", function(newCollectibleId)
+  -- we could check if the id is one of addon.Companions[].id, but that is probably more expensive than just updating
+  -- this actually fires when the new companion is appearing...?!!
+  addon.updateCompanionRapport()
+end)
+
+function addon.updateCompanionRapport()
+  local cid = GetActiveCompanionDefId()
+  if addon.Companions[cid] ~= nil then
+    addon.Companions.rapport = GetActiveCompanionRapport()
+    d("|BC| "..addon.Companions[cid].name.." current rapport: "..addon.Companions.rapport)
+  end
+end
 
 function addon.summonCompanion (companionid, wait)
   if (GetGameTimeMilliseconds() - addon.lastsummon) < 6000 then
@@ -256,6 +271,7 @@ function addon.summonCompanion (companionid, wait)
       -- summon in progress, do nothing
     else
       -- all clear, try a summon
+      addon.updateCompanionRapport()
       addon.lastsummon = GetGameTimeMilliseconds()
       zo_callLater(function()
         UseCollectible (addon.Companions[companionid].id)
@@ -293,8 +309,12 @@ end)
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_COMPANION_ACTIVATED,
 function()
-  local cid = GetActiveCompanionDefId()
-  -- d("companion summoned " .. cid)
+  addon.updateCompanionRapport()
+end)
+
+EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_COMPANION_RAPPORT_UPDATE,
+function()
+  addon.updateCompanionRapport()
 end)
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_QUEST_COMPLETE,
