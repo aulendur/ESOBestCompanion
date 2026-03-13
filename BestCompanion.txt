@@ -3,7 +3,7 @@
 ## Description: Summon a specific companion, or unsummon your companion, to maximize rapport for the action at hand
 ## AddOnVersion: 0.1
 ## IsLibrary: False
-## SavedVariables: BestCompanionSavedVariables
+## SavedVariables: BC_SVars
 
 BestCompanion.lua
 

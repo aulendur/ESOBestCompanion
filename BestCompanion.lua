@@ -1,4 +1,4 @@
--- vim: set et ts=2 sw=2 sts=2 tw=79 cc=80 list listchars=trail\:·:
+-- vim: set et ts=2 sw=2 sts=2 tw=79 cc=80 list listchars=trail\:�:
 BestCompanion = {}
 BestCompanion.name = "BestCompanion"
 
@@ -67,6 +67,20 @@ function addon.Initialize()
         addon.IntroQuests[questname] = i
       end
     end
+  end
+
+  -- https://github.com/esoui/esoui/blob/c357b8171a6dabecd259a6d74dd3e96036f89a43/esoui/libraries/utility/zo_savedvars.lua#L11
+  -- SV_TableName, SV_Version, SV_SubTable/namespace, SV_Defaults, SV_Profile, SV_DisplayName
+  -- SV_Profile can be used to distinguish between realms (but also SV_SubTable)
+  -- SV_DisplayName = @accountname by default, use fixed string for cross-account settings
+  -- Possible to pass in per-account settings for per-character SV_Defaults
+  -- local charSettings = ZO_SavedVars:NewCharacterId("BC_SVars", 1, "Settings", defaults, worldName)
+  -- local accSettings = ZO_SavedVars:NewAccountWide("BC_SVars", 1, "Settings", defaults, worldName, nil)
+
+  local worldName = GetWorldName()
+  addon.SV = ZO_SavedVars:NewAccountWide("BC_SVars", 1, "Settings", {companionRapport={}}, worldName, nil)--"$InstallationWide")
+  for id, comp in pairs(addon.Companions) do
+    comp.rapport = addon.SV.companionRapport[id] or comp.rapport or 0
   end
 
   addon.lastinteraction = {}
@@ -257,8 +271,10 @@ end)
 function addon.updateCompanionRapport()
   local cid = GetActiveCompanionDefId()
   if addon.Companions[cid] ~= nil then
-    addon.Companions.rapport = GetActiveCompanionRapport()
-    d("|BC| "..addon.Companions[cid].name.." current rapport: "..addon.Companions.rapport)
+    local rapport = GetActiveCompanionRapport()
+    addon.Companions[cid].rapport = rapport
+    addon.SV.companionRapport[cid] = rapport
+    d("|BC| "..addon.Companions[cid].name.." current rapport: "..tostring(rapport))
   end
 end
 
