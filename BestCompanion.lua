@@ -47,6 +47,7 @@ function addon.Initialize()
   addon.IntroQuests = {}
   addon.ShalidorBooks = {}
   addon.loadShalidorBooks()
+  addon.earlylog = ""
   -- GetActiveCompanionDefId returns integers from 1 up to 13 as of U44
   for i = 1, 20 do
     local cid = GetCompanionCollectibleId (i)
@@ -78,9 +79,15 @@ function addon.Initialize()
   -- local accSettings = ZO_SavedVars:NewAccountWide("BC_SVars", 1, "Settings", defaults, worldName, nil)
 
   local worldName = GetWorldName()
-  addon.SV = ZO_SavedVars:NewAccountWide("BC_SVars", 1, "Settings", {companionRapport={}}, worldName, nil)--"$InstallationWide")
+  local charId = GetCurrentCharacterId()
+  addon.SV = ZO_SavedVars:NewAccountWide("BC_SVars", 1, "Settings", {companionRapport={}}, worldName, nil)
+  addon.SV.companionRapport[charId] = addon.SV.companionRapport[charId] or {}
   for id, comp in pairs(addon.Companions) do
-    comp.rapport = addon.SV.companionRapport[id] or comp.rapport or 0
+    addon.SV.companionRapport[charId]["name"] = GetUnitName("player")
+    if addon.SV.companionRapport[charId][id] ~= nil then
+      addon.earlylog = addon.earlylog .. "|BC| Loaded saved rapport for "..comp.name..": "..tostring(addon.SV.companionRapport[charId][id]) .. "\n"
+    end
+    comp.rapport = addon.SV.companionRapport[charId][id] or comp.rapport or 0
   end
 
   addon.lastinteraction = {}
@@ -225,7 +232,6 @@ function addon.Initialize()
     end
   end)
 
-  addon.init_done = "Hello Nirn!"
   addon.lastsummon = GetGameTimeMilliseconds()
 end
 
@@ -256,8 +262,8 @@ EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_ADD_ON_LOADED, addon.OnAddOnLo
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_PLAYER_ACTIVATED,
 function()
   addon.player_activated = addon.player_activated + 1
-  if addon.player_activated == 1 then
-    -- d(addon.init_done)
+  if addon.player_activated == 1 and addon.earlylog and addon.earlylog ~= "" then
+    d(addon.earlylog)
   end
   addon.updateCompanionRapport()
 end)
@@ -273,7 +279,9 @@ function addon.updateCompanionRapport()
   if addon.Companions[cid] ~= nil then
     local rapport = GetActiveCompanionRapport()
     addon.Companions[cid].rapport = rapport
-    addon.SV.companionRapport[cid] = rapport
+    local charId = GetCurrentCharacterId()
+    addon.SV.companionRapport[charId] = addon.SV.companionRapport[charId] or {}
+    addon.SV.companionRapport[charId][cid] = rapport
     d("|BC| "..addon.Companions[cid].name.." current rapport: "..tostring(rapport))
   end
 end
