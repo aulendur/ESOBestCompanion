@@ -162,7 +162,11 @@ function addon.Initialize()
       elseif action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == MIRRI then
           UseCollectible (addon.Companions[MIRRI].id)
       elseif action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
-        addon.summonCompanion (MIRRI, wait)
+        if addon.Companions[MIRRI].introdone then
+          addon.summonCompanion (MIRRI, wait)
+        else
+          addon.summonCompanion (TANLORIN, wait)
+        end
       elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then
         addon.summonCompanion (MIRRI, wait)
         return addon.PauseInteraction{MIRRI}
