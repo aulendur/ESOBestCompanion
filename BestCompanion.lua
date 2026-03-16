@@ -118,8 +118,6 @@ function addon.Initialize()
       -- Use, Blueblood Wayshrine
       -- Use, Alchemy Station/Cooking Fire
 
-      local wait = 0
-
       if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == TANLORIN then
         UseCollectible (addon.Companions[TANLORIN].id)
       elseif action == "Collect" and (
@@ -129,23 +127,23 @@ function addon.Initialize()
         UseCollectible (addon.Companions[AZANDAR].id)
       elseif action == "Dig" and name == "Dirt Mound" then
         if addon.Companions[SHARP].introdone then
-          addon.summonCompanion (SHARP, wait)
+          addon.summonCompanion (SHARP)
           return addon.PauseInteraction{SHARP}
         else
-          addon.summonCompanion (MIRRI, wait)
+          addon.summonCompanion (MIRRI)
           return addon.PauseInteraction{MIRRI}
         end
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
-        addon.summonCompanion (TANLORIN, wait)
+        addon.summonCompanion (TANLORIN)
         return addon.PauseInteraction{TANLORIN}
       elseif action == "Examine" and name == "Enchanter Delivery Crate" then
-        addon.summonCompanion (AZANDAR, wait)
+        addon.summonCompanion (AZANDAR)
         return addon.PauseInteraction{AZANDAR}
       elseif action == "Examine" and GetActiveCompanionDefId() == TANLORIN and
              addon.ShalidorBooks[name] ~= nil then
         UseCollectible (addon.Companions[TANLORIN].id)
       elseif action == "Loot" and name == "Psijic Portal" then
-        addon.summonCompanion (BASTIAN, wait)
+        addon.summonCompanion (BASTIAN)
       elseif action == "Open" then
         if name:match ("^Mages Guild") then
           if addon.Companions[BASTIAN].introdone then
@@ -163,7 +161,7 @@ function addon.Initialize()
         end
       elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
         if not IsPlayerMoving() then
-          addon.summonCompanion (MIRRI, wait)
+          addon.summonCompanion (MIRRI)
         else
           addon.lastinteraction = {}
         end
@@ -175,24 +173,24 @@ function addon.Initialize()
           return true
         elseif name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or
                name:match ('^Signature Script: ') then
-          addon.summonCompanion (TANLORIN, wait)
+          addon.summonCompanion (TANLORI)
           return addon.PauseInteraction{TANLORIN}
         end
       elseif action == "Talk" and name == "Lyris Titanborn" then
-          addon.summonCompanion (ISOBEL, wait)
+          addon.summonCompanion (ISOBEL)
       elseif action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == MIRRI then
           UseCollectible (addon.Companions[MIRRI].id)
       elseif action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
         if addon.Companions[MIRRI].introdone then
-          addon.summonCompanion (MIRRI, wait)
+          addon.summonCompanion (MIRRI)
         else
-          addon.summonCompanion (TANLORIN, wait)
+          addon.summonCompanion (TANLORIN)
         end
       elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then
-        addon.summonCompanion (MIRRI, wait)
+        addon.summonCompanion (MIRRI)
         return addon.PauseInteraction{MIRRI}
       elseif action == "Use" and name == "Skyshard" then
-        addon.summonCompanion (TANLORIN, wait)
+        addon.summonCompanion (TANLORIN)
         return addon.PauseInteraction{TANLORIN}
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
@@ -214,21 +212,21 @@ function addon.Initialize()
   SCENE_MANAGER:GetScene("Scrying"):RegisterCallback("StateChange",
   function(old, new)
     if (new == SCENE_SHOWN) then
-      addon.summonCompanion (BASTIAN, wait)
+      addon.summonCompanion (BASTIAN)
     end
   end)
 
   SCENE_MANAGER:GetScene("antiquityDigging"):RegisterCallback("StateChange",
   function(old, new)
     if (new == SCENE_SHOWN) then
-      addon.summonCompanion (MIRRI, wait)
+      addon.summonCompanion (MIRRI)
     end
   end)
 
   SCENE_MANAGER:GetScene("scribingKeyboard"):RegisterCallback("StateChange",
   function(old, new)
     if (new == SCENE_SHOWN) then
-      addon.summonCompanion (TANLORIN, wait)
+      addon.summonCompanion (TANLORIN)
     end
   end)
 
@@ -286,7 +284,7 @@ function addon.updateCompanionRapport()
   end
 end
 
-function addon.summonCompanion (companionid, wait)
+function addon.summonCompanion (companionid)
   if (GetGameTimeMilliseconds() - addon.lastsummon) < 6000 then
     -- don't do anything if we attempted a summon in the last five seconds
   elseif addon.Companions[companionid].unlocked and addon.Companions[companionid].introdone
@@ -303,7 +301,7 @@ function addon.summonCompanion (companionid, wait)
       addon.lastsummon = GetGameTimeMilliseconds()
       zo_callLater(function()
         UseCollectible (addon.Companions[companionid].id)
-      end, wait)
+      end, 0)
       return true
     end
   elseif addon.Companions[companionid].unlocked and not addon.Companions[companionid].introdone then
@@ -319,14 +317,13 @@ end
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_CRAFTING_STATION_INTERACT,
 function(event, station)
-  local wait = 0
   -- TODO: save active companion and resummon after crafting
   if GetCraftingInteractionType() == CRAFTING_TYPE_ALCHEMY then
-    addon.summonCompanion (SHARP, wait)
+    addon.summonCompanion (SHARP)
   elseif GetCraftingInteractionType() == CRAFTING_TYPE_BLACKSMITHING then
-    addon.summonCompanion (ISOBEL, wait)
+    addon.summonCompanion (ISOBEL)
   elseif GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING then
-    addon.summonCompanion (MIRRI, wait)
+    addon.summonCompanion (MIRRI)
   end
 end)
 
