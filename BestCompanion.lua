@@ -48,6 +48,8 @@ function addon.Initialize()
   addon.ShalidorBooks = {}
   addon.loadShalidorBooks()
   addon.earlylog = ""
+  addon.maximumrapport = GetMaximumRapport()
+
   -- GetActiveCompanionDefId returns integers from 1 up to 13 as of U44
   for i = 1, 20 do
     local cid = GetCompanionCollectibleId (i)
@@ -303,6 +305,11 @@ function addon.summonCompanion (companionid)
     return false
   end
   if HasPendingCompanion() then return false end
+
+  if addon.SV.companionRapport[GetCurrentCharacterId()][companionid] >= addon.maximumrapport then
+    d("|BC| "..addon.Companions[companionid].name.." has maximum rapport, no need to summon")
+    return false
+  end
 
   -- all clear to summon
   addon.lastcompanion = GetActiveCompanionDefId()
