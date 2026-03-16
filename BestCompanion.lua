@@ -85,7 +85,7 @@ function addon.Initialize()
   for id, comp in pairs(addon.Companions) do
     addon.SV.companionRapport[charId]["name"] = GetUnitName("player")
     if addon.SV.companionRapport[charId][id] ~= nil then
-      addon.earlylog = addon.earlylog .. "|BC| Loaded saved rapport for "..comp.name..": "..tostring(addon.SV.companionRapport[charId][id]) .. "\n"
+      -- addon.earlylog = addon.earlylog .. "|BC| Loaded saved rapport for "..comp.name..": "..tostring(addon.SV.companionRapport[charId][id]) .. "\n"
     end
     comp.rapport = addon.SV.companionRapport[charId][id] or comp.rapport or 0
   end
@@ -286,33 +286,32 @@ end
 
 function addon.summonCompanion (companionid)
   if (GetGameTimeMilliseconds() - addon.lastsummon) < 6000 then
-    -- don't do anything if we attempted a summon in the last five seconds
-  elseif addon.Companions[companionid].unlocked and addon.Companions[companionid].introdone
-    and companionid ~= GetActiveCompanionDefId() then
-    addon.lastcompanion = GetActiveCompanionDefId()
-    if HasBlockedCompanion() then
-      -- Full group, Cyro/IC, ...
-      -- d("|BC| Companion blocked, cannot summon")
-    elseif HasPendingCompanion() then
-      -- summon in progress, do nothing
-    else
-      -- all clear, try a summon
-      addon.updateCompanionRapport()
-      addon.lastsummon = GetGameTimeMilliseconds()
-      zo_callLater(function()
-        UseCollectible (addon.Companions[companionid].id)
-      end, 0)
-      return true
-    end
-  elseif addon.Companions[companionid].unlocked and not addon.Companions[companionid].introdone then
+    return false
+  end
+
+  if not addon.Companions[companionid].unlocked then return false end
+  if not addon.Companions[companionid].introdone then
     if addon.Companions[companionid].nagplayer then
       d(addon.Companions[companionid].name .. " is unlocked but you have not completed their quest")
       addon.Companions[companionid].nagplayer = false
     end
-  else
-    -- pass
+    return false
   end
-  return false
+  if companionid == GetActiveCompanionDefId() then return false end
+  if HasBlockedCompanion() or DoesCurrentZoneHaveTelvarStoneBehavior() or IsInCyrodiil() then
+    -- d("|BC| Companion blocked, cannot summon")
+    return false
+  end
+  if HasPendingCompanion() then return false end
+
+  -- all clear to summon
+  addon.lastcompanion = GetActiveCompanionDefId()
+  addon.updateCompanionRapport()
+  addon.lastsummon = GetGameTimeMilliseconds()
+  zo_callLater(function()
+    UseCollectible (addon.Companions[companionid].id)
+  end, 0)
+  return true
 end
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_CRAFTING_STATION_INTERACT,
