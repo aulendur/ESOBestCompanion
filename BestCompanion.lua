@@ -97,6 +97,13 @@ function addon.Initialize()
   ZO_PreHook(RETICLE, "TryHandlingInteraction", function(event, possible, frametimeseconds)
     local action, name, blocked, owned, info, context, link, criminal =
       GetGameCameraInteractableActionInfo()
+
+    if HasPendingCompanion() then
+      EndPendingInteraction()
+      addon.lastinteraction = {}
+      return true
+    end
+
     if possible and action and 
       (action ~= addon.lastinteraction["action"] or name ~= addon.lastinteraction["name"]) then
       addon.lastinteraction = { action=action, name=name }
@@ -287,6 +294,18 @@ function addon.updateCompanionRapport()
 end
 
 function addon.summonCompanion (companionid)
+  if HasBlockedCompanion() or DoesCurrentZoneHaveTelvarStoneBehavior() or IsInCyrodiil() then
+    -- d("|BC| Companion blocked, cannot summon")
+    return false
+  end
+
+  if HasPendingCompanion() then
+    -- d("|BC| Companion pending, cancelling interaction")
+    EndPendingInteraction()
+    addon.lastinteraction = {}
+    return true
+  end
+
   if (GetGameTimeMilliseconds() - addon.lastsummon) < 6000 then
     return false
   end
@@ -300,11 +319,6 @@ function addon.summonCompanion (companionid)
     return false
   end
   if companionid == GetActiveCompanionDefId() then return false end
-  if HasBlockedCompanion() or DoesCurrentZoneHaveTelvarStoneBehavior() or IsInCyrodiil() then
-    -- d("|BC| Companion blocked, cannot summon")
-    return false
-  end
-  if HasPendingCompanion() then return false end
 
   if addon.SV.companionRapport[GetCurrentCharacterId()][companionid] >= addon.maximumrapport then
     d("|BC| "..addon.Companions[companionid].name.." has maximum rapport, no need to summon")
