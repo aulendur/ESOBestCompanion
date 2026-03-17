@@ -320,7 +320,9 @@ function addon.summonCompanion (companionid)
   end
   if companionid == GetActiveCompanionDefId() then return false end
 
-  if addon.SV.companionRapport[GetCurrentCharacterId()][companionid] >= addon.maximumrapport then
+  local charId = GetCurrentCharacterId()
+  local rapport = addon.SV.companionRapport[charId][companionid] or 0
+  if rapport >= addon.maximumrapport then
     d("|BC| "..addon.Companions[companionid].name.." has maximum rapport, no need to summon")
     return false
   end
