@@ -136,18 +136,14 @@ function addon.Initialize()
         UseCollectible (addon.Companions[AZANDAR].id)
       elseif action == "Dig" and name == "Dirt Mound" then
         if addon.Companions[SHARP].introdone then
-          addon.summonCompanion (SHARP)
-          return addon.PauseInteraction{SHARP}
+          return addon.summonCompanion (SHARP)
         else
-          addon.summonCompanion (MIRRI)
-          return addon.PauseInteraction{MIRRI}
+          return addon.summonCompanion (MIRRI)
         end
       elseif action == "Examine" and name == "Alchemist Delivery Crate" then
-        addon.summonCompanion (TANLORIN)
-        return addon.PauseInteraction{TANLORIN}
+        return addon.summonCompanion (TANLORIN)
       elseif action == "Examine" and name == "Enchanter Delivery Crate" then
-        addon.summonCompanion (AZANDAR)
-        return addon.PauseInteraction{AZANDAR}
+        return addon.summonCompanion (AZANDAR)
       elseif action == "Examine" and GetActiveCompanionDefId() == TANLORIN and
              addon.ShalidorBooks[name] ~= nil then
         UseCollectible (addon.Companions[TANLORIN].id)
@@ -182,8 +178,7 @@ function addon.Initialize()
           return true
         elseif name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or
                name:match ('^Signature Script: ') then
-          addon.summonCompanion (TANLORI)
-          return addon.PauseInteraction{TANLORIN}
+          return addon.summonCompanion (TANLORIN)
         end
       elseif action == "Talk" and name == "Lyris Titanborn" then
           addon.summonCompanion (ISOBEL)
@@ -196,11 +191,9 @@ function addon.Initialize()
           addon.summonCompanion (TANLORIN)
         end
       elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then
-        addon.summonCompanion (MIRRI)
-        return addon.PauseInteraction{MIRRI}
+        return addon.summonCompanion (MIRRI)
       elseif action == "Use" and name == "Skyshard" then
-        addon.summonCompanion (TANLORIN)
-        return addon.PauseInteraction{TANLORIN}
+        return addon.summonCompanion (TANLORIN)
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
@@ -240,21 +233,6 @@ function addon.Initialize()
   end)
 
   addon.lastsummon = GetGameTimeMilliseconds()
-end
-
-function addon.PauseInteraction (t)
-  setmetatable (t,{__index={interaction={}}})
-  local companion, interaction = t[1] or t.companion, t[2] or t.interaction
-  if not HasBlockedCompanion() and not DoesCurrentZoneHaveTelvarStoneBehavior() and not IsInCyrodiil() then
-    if addon.Companions[companion].introdone and GetActiveCompanionDefId() ~= companion then
-      --d("Waiting for "..companion..", pausing interaction '"..addon.prettyprint(interaction).."'")
-      EndPendingInteraction()
-      addon.lastinteraction = interaction
-      return true
-    end
-  else
-    --d("|BC| Companion blocked, cannot summon")
-  end
 end
 
 function addon.OnAddOnLoaded (event, addonName)
@@ -327,13 +305,13 @@ function addon.summonCompanion (companionid)
     return false
   end
 
-  -- all clear to summon
+  -- all clear: cancel and clear the current interaction and summon the new companion
   addon.lastcompanion = GetActiveCompanionDefId()
   addon.updateCompanionRapport()
   addon.lastsummon = GetGameTimeMilliseconds()
-  zo_callLater(function()
-    UseCollectible (addon.Companions[companionid].id)
-  end, 0)
+  UseCollectible (addon.Companions[companionid].id)
+  EndPendingInteraction()
+  addon.lastinteraction = {}
   return true
 end
 
