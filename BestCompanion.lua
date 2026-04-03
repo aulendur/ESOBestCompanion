@@ -94,6 +94,7 @@ function addon.Initialize()
 
   addon.lastinteraction = {}
   addon.lastcompanion = false
+  addon.unsummon = false
   ZO_PreHook(RETICLE, "TryHandlingInteraction", function(event, possible, frametimeseconds)
     local action, name, blocked, owned, info, context, link, criminal =
       GetGameCameraInteractableActionInfo()
@@ -131,31 +132,15 @@ function addon.Initialize()
         return true
       end
 
-      if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == TANLORIN then
-        UseCollectible (addon.Companions[TANLORIN].id)
-      elseif action == "Collect" and (
-             --name == "Imp Stool" or name == "White Cap"
-             name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot") and
-             GetActiveCompanionDefId() == AZANDAR then
-        UseCollectible (addon.Companions[AZANDAR].id)
-      elseif action == "Examine" and GetActiveCompanionDefId() == TANLORIN and
-             addon.ShalidorBooks[name] ~= nil then
-        UseCollectible (addon.Companions[TANLORIN].id)
-      elseif action == "Open" then
-        if name:match ("^Mages Guild") then
+      if action == "Open" and name:match ("^Mages Guild") then
           if addon.Companions[BASTIAN].introdone then
             addon.summonCompanion (BASTIAN)
-          elseif GetActiveCompanionDefId() == TANLORIN then
-            UseCollectible (addon.Companions[TANLORIN].id)
           end
-        elseif name:match (' Refuge$') then
+      elseif action == "Open" and name:match (' Refuge$') then
           if addon.Companions[EMBER].introdone then
             addon.summonCompanion (EMBER)
-          elseif GetActiveCompanionDefId() == ISOBEL then
-            UseCollectible (addon.Companions[ISOBEL].id)
           end
         -- elseif IsInOutlawZone() and last companion was Isobel then resummon after exit
-        end
       elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
         if not IsPlayerMoving() then
           addon.summonCompanion (MIRRI)
@@ -167,8 +152,6 @@ function addon.Initialize()
           EndPendingInteraction()
           addon.lastinteraction = {}
           return true
-      elseif action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == MIRRI then
-          UseCollectible (addon.Companions[MIRRI].id)
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
@@ -293,6 +276,7 @@ end
 function addon.getDesiredCompanionForInteraction(action, name)
   if not action or not name then return nil end
 
+  addon.unsummon = false
   if action == "Dig" and name == "Dirt Mound" then
     if addon.Companions[SHARP].introdone then return SHARP else return MIRRI end
   end
@@ -306,13 +290,29 @@ function addon.getDesiredCompanionForInteraction(action, name)
   end
   if action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then return MIRRI end
   if action == "Use" and name == "Skyshard" then return TANLORIN end
+  -- unsummon interaction list
+  addon.unsummon = true
+  if action == "Collect" and (name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot") and
+     GetActiveCompanionDefId() == AZANDAR then return AZANDAR end
+  if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
+  if action == "Examine" and addon.ShalidorBooks[name] ~= nil and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
+  if action == "Open" and name:match ("^Mages Guild") and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
+  if action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then return ISOBEL end
+  if action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == MIRRI then return MIRRI end
+
   return nil
 end
+
 function addon.handleInteraction(action, name)
   local desired = addon.getDesiredCompanionForInteraction(action, name)
   if not desired then return false end
 
-  return addon.summonCompanion (desired)
+  if addon.unsummon and GetActiveCompanionDefId() == desired then
+    UseCollectible (addon.Companions[desired].id)
+    return true
+  else
+    return addon.summonCompanion(desired)
+  end
 end
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_CRAFTING_STATION_INTERACT,
