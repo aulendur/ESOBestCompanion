@@ -127,6 +127,10 @@ function addon.Initialize()
       -- Use, Blueblood Wayshrine
       -- Use, Alchemy Station/Cooking Fire
 
+      if addon.handleInteraction (action, name) then
+        return true
+      end
+
       if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == TANLORIN then
         UseCollectible (addon.Companions[TANLORIN].id)
       elseif action == "Collect" and (
@@ -134,21 +138,9 @@ function addon.Initialize()
              name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot") and
              GetActiveCompanionDefId() == AZANDAR then
         UseCollectible (addon.Companions[AZANDAR].id)
-      elseif action == "Dig" and name == "Dirt Mound" then
-        if addon.Companions[SHARP].introdone then
-          return addon.summonCompanion (SHARP)
-        else
-          return addon.summonCompanion (MIRRI)
-        end
-      elseif action == "Examine" and name == "Alchemist Delivery Crate" then
-        return addon.summonCompanion (TANLORIN)
-      elseif action == "Examine" and name == "Enchanter Delivery Crate" then
-        return addon.summonCompanion (AZANDAR)
       elseif action == "Examine" and GetActiveCompanionDefId() == TANLORIN and
              addon.ShalidorBooks[name] ~= nil then
         UseCollectible (addon.Companions[TANLORIN].id)
-      elseif action == "Loot" and name == "Psijic Portal" then
-        addon.summonCompanion (BASTIAN)
       elseif action == "Open" then
         if name:match ("^Mages Guild") then
           if addon.Companions[BASTIAN].introdone then
@@ -170,30 +162,13 @@ function addon.Initialize()
         else
           addon.lastinteraction = {}
         end
-      elseif action == "Take" then
-        if GetActiveCompanionDefId() == MIRRI and
+      elseif action == "Take" and GetActiveCompanionDefId() == MIRRI and
            (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then
           EndPendingInteraction()
           addon.lastinteraction = {}
           return true
-        elseif name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or
-               name:match ('^Signature Script: ') then
-          return addon.summonCompanion (TANLORIN)
-        end
-      elseif action == "Talk" and name == "Lyris Titanborn" then
-          addon.summonCompanion (ISOBEL)
       elseif action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == MIRRI then
           UseCollectible (addon.Companions[MIRRI].id)
-      elseif action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
-        if addon.Companions[MIRRI].introdone then
-          addon.summonCompanion (MIRRI)
-        else
-          addon.summonCompanion (TANLORIN)
-        end
-      elseif action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then
-        return addon.summonCompanion (MIRRI)
-      elseif action == "Use" and name == "Skyshard" then
-        return addon.summonCompanion (TANLORIN)
       else
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
@@ -313,6 +288,31 @@ function addon.summonCompanion (companionid)
   EndPendingInteraction()
   addon.lastinteraction = {}
   return true
+end
+
+function addon.getDesiredCompanionForInteraction(action, name)
+  if not action or not name then return nil end
+
+  if action == "Dig" and name == "Dirt Mound" then
+    if addon.Companions[SHARP].introdone then return SHARP else return MIRRI end
+  end
+  if action == "Examine" and name == "Alchemist Delivery Crate" then return TANLORIN end
+  if action == "Examine" and name == "Enchanter Delivery Crate" then return AZANDAR end
+  if action == "Loot" and name == "Psijic Portal" then return BASTIAN end
+  if action == "Take" and (name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or name:match ('^Signature Script: ')) then return TANLORIN end
+  if action == "Talk" and name == "Lyris Titanborn" then return ISOBEL end
+  if action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
+    if addon.Companions[MIRRI].introdone then return MIRRI else return TANLORIN end
+  end
+  if action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then return MIRRI end
+  if action == "Use" and name == "Skyshard" then return TANLORIN end
+  return nil
+end
+function addon.handleInteraction(action, name)
+  local desired = addon.getDesiredCompanionForInteraction(action, name)
+  if not desired then return false end
+
+  return addon.summonCompanion (desired)
 end
 
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_CRAFTING_STATION_INTERACT,
