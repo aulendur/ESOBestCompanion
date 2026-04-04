@@ -290,8 +290,9 @@ function addon.getDesiredCompanionForInteraction(action, name)
   if action == "Use" and name == "Skyshard" then return TANLORIN end
   -- unsummon interaction list
   addon.unsummon = true
-  if action == "Collect" and (name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot") and
-     GetActiveCompanionDefId() == AZANDAR then return AZANDAR end
+  if action == "Collect" and GetActiveCompanionDefId() == AZANDAR
+     and (name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot" or name == "Stinkhorn")
+     then return AZANDAR end
   if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
   if action == "Examine" and addon.ShalidorBooks[name] ~= nil and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
   if action == "Open" and name:match ("^Mages Guild") and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
