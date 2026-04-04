@@ -100,9 +100,13 @@ function addon.Initialize()
       GetGameCameraInteractableActionInfo()
 
     if HasPendingCompanion() then
-      EndPendingInteraction()
-      addon.lastinteraction = {}
-      return true
+      local pendingid = GetPendingCompanionDefId()
+      --d("|BC| PendingCompanionDefId="..pendingid)
+      if pendingid and pendingid == addon.getDesiredCompanionForInteraction (action, name) then
+        EndPendingInteraction()
+        addon.lastinteraction = {}
+        return true
+      end
     end
 
     if possible and action and 
