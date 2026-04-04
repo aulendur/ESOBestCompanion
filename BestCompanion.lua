@@ -136,32 +136,22 @@ function addon.Initialize()
         return true
       end
 
-      if action == "Open" and name:match ("^Mages Guild") then
-          if addon.Companions[BASTIAN].introdone then
-            addon.summonCompanion (BASTIAN)
-          end
-      elseif action == "Open" and name:match (' Refuge$') then
-          if addon.Companions[EMBER].introdone then
-            addon.summonCompanion (EMBER)
-          end
-        -- elseif IsInOutlawZone() and last companion was Isobel then resummon after exit
-      elseif action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") then
-        if not IsPlayerMoving() then
-          addon.summonCompanion (MIRRI)
-        else
-          addon.lastinteraction = {}
-        end
-      elseif action == "Take" and GetActiveCompanionDefId() == MIRRI and
-           (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then
-          EndPendingInteraction()
-          addon.lastinteraction = {}
-          return true
-      else
+      -- if action == "Steal From"
+      -- and (name == "Thieves Trove" or name == "Safebox") and IsPlayerMoving() then
+      --  addon.lastinteraction = {}
+      -- end
+      -- if action == "Take" and GetActiveCompanionDefId() == MIRRI and
+      --    (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then
+      --   EndPendingInteraction()
+      --   addon.lastinteraction = {}
+      --   return true
+      -- end
+
+      -- debug if no action taken
         -- d("interaction: "..tostring(frametimeseconds)..": "..
         --   tostring(action)..", "..tostring(name)..", "..tostring(blocked)..", "..
         --   tostring(owned)..", "..tostring(info)..", "..tostring(context)..", "..
         --   tostring(link)..", "..tostring(criminal))
-      end
     end
   end)
 
@@ -287,6 +277,10 @@ function addon.getDesiredCompanionForInteraction(action, name)
   if action == "Examine" and name == "Alchemist Delivery Crate" then return TANLORIN end
   if action == "Examine" and name == "Enchanter Delivery Crate" then return AZANDAR end
   if action == "Loot" and name == "Psijic Portal" then return BASTIAN end
+  if action == "Open" and name:match ("^Mages Guild") and addon.Companions[BASTIAN].introdone then return BASTIAN end
+  if action == "Open" and name:match (' Refuge$') and addon.Companions[EMBER].introdone then return EMBER end
+  -- if action=open?? and player IsInOutlawZone() and last companion was Isobel then resummon after exit
+  if action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") and not IsPlayerMoving() then return MIRRI end
   if action == "Take" and (name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or name:match ('^Signature Script: ')) then return TANLORIN end
   if action == "Talk" and name == "Lyris Titanborn" then return ISOBEL end
   if action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
@@ -303,6 +297,7 @@ function addon.getDesiredCompanionForInteraction(action, name)
   if action == "Open" and name:match ("^Mages Guild") and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
   if action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then return ISOBEL end
   if action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == MIRRI then return MIRRI end
+  if action == "Take" and GetActiveCompanionDefId() == MIRRI and (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then return MIRRI end
 
   return nil
 end
