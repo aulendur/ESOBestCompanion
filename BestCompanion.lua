@@ -4,15 +4,40 @@ BestCompanion.name = "BestCompanion"
 
 -- generalized reference
 local addon = BestCompanion
+-- Companion definitions: single source of truth (non-breaking addition)
+addon.CompanionDefs = {
+  BASTIAN  = { defId = 1, name = "Bastian" },
+  MIRRI    = { defId = 2, name = "Mirri" },
+  EMBER    = { defId = 5, name = "Ember" },
+  ISOBEL   = { defId = 6, name = "Isobel" },
+  SHARP    = { defId = 8, name = "Sharp" },
+  AZANDAR  = { defId = 9, name = "Azandar" },
+  TANLORIN = { defId = 12, name = "Tanlorin" },
+  ZERITHVAR= { defId = 13, name = "Zerithvar" },
+}
 
-local BASTIAN = 1
-local MIRRI   = 2
-local EMBER   = 5
-local ISOBEL  = 6
-local SHARP   = 8
-local AZANDAR = 9
-local TANLORIN  = 12
-local ZERITHVAR = 13
+function addon.GetCompanionDefId(key)
+  local def = addon.CompanionDefs and addon.CompanionDefs[key]
+  return def and def.defId or nil
+end
+
+function addon.GetCompanionKeyByDefId(defId)
+  if not addon.CompanionDefs then return nil end
+  for k,v in pairs(addon.CompanionDefs) do
+    if v.defId == defId then return k end
+  end
+  return nil
+end
+
+-- Numeric aliases kept for compatibility, derive from CompanionDefs where possible
+local BASTIAN = addon.GetCompanionDefId("BASTIAN") or 1
+local MIRRI   = addon.GetCompanionDefId("MIRRI") or 2
+local EMBER   = addon.GetCompanionDefId("EMBER") or 5
+local ISOBEL  = addon.GetCompanionDefId("ISOBEL") or 6
+local SHARP   = addon.GetCompanionDefId("SHARP") or 8
+local AZANDAR = addon.GetCompanionDefId("AZANDAR") or 9
+local TANLORIN  = addon.GetCompanionDefId("TANLORIN") or 12
+local ZERITHVAR = addon.GetCompanionDefId("ZERITHVAR") or 13
 
 function addon.prettyprint (ref, pre, post)
   if type (ref) == 'table' then
