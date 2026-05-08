@@ -29,15 +29,17 @@ function addon.GetCompanionKeyByDefId(defId)
   return nil
 end
 
--- Numeric aliases kept for compatibility, derive from CompanionDefs where possible
-local BASTIAN = addon.GetCompanionDefId("BASTIAN") or 1
-local MIRRI   = addon.GetCompanionDefId("MIRRI") or 2
-local EMBER   = addon.GetCompanionDefId("EMBER") or 5
-local ISOBEL  = addon.GetCompanionDefId("ISOBEL") or 6
-local SHARP   = addon.GetCompanionDefId("SHARP") or 8
-local AZANDAR = addon.GetCompanionDefId("AZANDAR") or 9
-local TANLORIN  = addon.GetCompanionDefId("TANLORIN") or 12
-local ZERITHVAR = addon.GetCompanionDefId("ZERITHVAR") or 13
+function addon.SummonCompanionByKey(key)
+  local id = addon.GetCompanionDefId(key)
+  if not id then return false end
+  return addon.summonCompanion(id)
+end
+
+function addon.GetCompanionByKey(key)
+  local id = addon.GetCompanionDefId(key)
+  if not id then return nil end
+  return addon.Companions[id]
+end
 
 function addon.prettyprint (ref, pre, post)
   if type (ref) == 'table' then
@@ -187,21 +189,21 @@ function addon.Initialize()
   SCENE_MANAGER:GetScene("Scrying"):RegisterCallback("StateChange",
   function(old, new)
     if (new == SCENE_SHOWN) then
-      addon.summonCompanion (BASTIAN)
+      addon.SummonCompanionByKey("BASTIAN")
     end
   end)
 
   SCENE_MANAGER:GetScene("antiquityDigging"):RegisterCallback("StateChange",
   function(old, new)
     if (new == SCENE_SHOWN) then
-      addon.summonCompanion (MIRRI)
+      addon.SummonCompanionByKey("MIRRI")
     end
   end)
 
   SCENE_MANAGER:GetScene("scribingKeyboard"):RegisterCallback("StateChange",
   function(old, new)
     if (new == SCENE_SHOWN) then
-      addon.summonCompanion (TANLORIN)
+      addon.SummonCompanionByKey("TANLORIN")
     end
   end)
 
@@ -293,33 +295,43 @@ function addon.getDesiredCompanionForInteraction(action, name)
 
   addon.unsummon = false
   if action == "Dig" and name == "Dirt Mound" then
-    if addon.Companions[SHARP].introdone then return SHARP else return MIRRI end
+    local sharp = addon.GetCompanionByKey("SHARP")
+    if sharp and sharp.introdone then return addon.GetCompanionDefId("SHARP") else return addon.GetCompanionDefId("MIRRI") end
   end
-  if action == "Examine" and name == "Alchemist Delivery Crate" then return TANLORIN end
-  if action == "Examine" and name == "Enchanter Delivery Crate" then return AZANDAR end
-  if action == "Loot" and name == "Psijic Portal" then return BASTIAN end
-  if action == "Open" and name:match ("^Mages Guild") and addon.Companions[BASTIAN].introdone then return BASTIAN end
-  if action == "Open" and name:match (' Refuge$') and addon.Companions[EMBER].introdone then return EMBER end
-  -- if action=open?? and player IsInOutlawZone() and last companion was Isobel then resummon after exit
-  if action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") and not IsPlayerMoving() then return MIRRI end
-  if action == "Take" and (name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or name:match ('^Signature Script: ')) then return TANLORIN end
-  if action == "Talk" and name == "Lyris Titanborn" then return ISOBEL end
+  if action == "Examine" and name == "Alchemist Delivery Crate" then return addon.GetCompanionDefId("TANLORIN") end
+  if action == "Examine" and name == "Enchanter Delivery Crate" then
+    local az = addon.GetCompanionByKey("AZANDAR")
+    if az and az.introdone then return addon.GetCompanionDefId("AZANDAR") else return addon.GetCompanionDefId("TANLORIN") end
+  end
+  if action == "Loot" and name == "Psijic Portal" then return addon.GetCompanionDefId("BASTIAN") end
+  do -- Bastion open/mages guild check using helper with safety
+    local bast = addon.GetCompanionByKey("BASTIAN")
+    if action == "Open" and name:match ("^Mages Guild") and bast and bast.introdone then return addon.GetCompanionDefId("BASTIAN") end
+  end
+  do -- Ember check
+    local ember = addon.GetCompanionByKey("EMBER")
+    if action == "Open" and name:match (' Refuge$') and ember and ember.introdone then return addon.GetCompanionDefId("EMBER") end
+  end
+  if action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") and not IsPlayerMoving() then return addon.GetCompanionDefId("MIRRI") end
+  if action == "Take" and (name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or name:match ('^Signature Script: ')) then return addon.GetCompanionDefId("TANLORIN") end
+  if action == "Talk" and name == "Lyris Titanborn" then return addon.GetCompanionDefId("ISOBEL") end
   if action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
-    if addon.Companions[MIRRI].introdone then return MIRRI else return TANLORIN end
+    local mir = addon.GetCompanionByKey("MIRRI")
+    if mir and mir.introdone then return addon.GetCompanionDefId("MIRRI") else return addon.GetCompanionDefId("TANLORIN") end
   end
-  if action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then return MIRRI end
-  if action == "Use" and name == "Skyshard" then return TANLORIN end
+  if action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then return addon.GetCompanionDefId("MIRRI") end
+  if action == "Use" and name == "Skyshard" then return addon.GetCompanionDefId("TANLORIN") end
   -- unsummon interaction list
   addon.unsummon = true
-  if action == "Collect" and GetActiveCompanionDefId() == AZANDAR
-     and (name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot" or name == "Stinkhorn")
-     then return AZANDAR end
-  if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
-  if action == "Examine" and addon.ShalidorBooks[name] ~= nil and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
-  if action == "Open" and name:match ("^Mages Guild") and GetActiveCompanionDefId() == TANLORIN then return TANLORIN end
-  if action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == ISOBEL then return ISOBEL end
-  if action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == MIRRI then return MIRRI end
-  if action == "Take" and GetActiveCompanionDefId() == MIRRI and (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then return MIRRI end
+      if action == "Collect" and GetActiveCompanionDefId() == addon.GetCompanionDefId("AZANDAR")
+        and (name == "Blue Entoloma" or name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot" or name == "Stinkhorn" or name == "White Cap")
+        then return addon.GetCompanionDefId("AZANDAR") end
+    if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
+    if action == "Examine" and addon.ShalidorBooks[name] ~= nil and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
+    if action == "Open" and name:match ("^Mages Guild") and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
+    if action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == addon.GetCompanionDefId("ISOBEL") then return addon.GetCompanionDefId("ISOBEL") end
+    if action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == addon.GetCompanionDefId("MIRRI") then return addon.GetCompanionDefId("MIRRI") end
+    if action == "Take" and GetActiveCompanionDefId() == addon.GetCompanionDefId("MIRRI") and (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then return addon.GetCompanionDefId("MIRRI") end
 
   return nil
 end
@@ -339,12 +351,13 @@ end
 EVENT_MANAGER:RegisterForEvent (addon.name, EVENT_CRAFTING_STATION_INTERACT,
 function(event, station)
   -- TODO: save active companion and resummon after crafting
-  if GetCraftingInteractionType() == CRAFTING_TYPE_ALCHEMY then
-    addon.summonCompanion (SHARP)
-  elseif GetCraftingInteractionType() == CRAFTING_TYPE_BLACKSMITHING then
-    addon.summonCompanion (ISOBEL)
-  elseif GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING then
-    addon.summonCompanion (MIRRI)
+  local ctype = GetCraftingInteractionType()
+  if ctype == CRAFTING_TYPE_ALCHEMY then
+    addon.SummonCompanionByKey("SHARP")
+  elseif ctype == CRAFTING_TYPE_BLACKSMITHING then
+    addon.SummonCompanionByKey("ISOBEL")
+  elseif ctype == CRAFTING_TYPE_PROVISIONING then
+    addon.SummonCompanionByKey("MIRRI")
   end
 end)
 
