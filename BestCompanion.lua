@@ -76,21 +76,17 @@ function addon.Initialize()
   addon.maximumrapport = GetMaximumRapport()
 
   -- GetActiveCompanionDefId returns integers from 1 up to 13 as of U44
-  for i = 1, 20 do
-    local cid = GetCompanionCollectibleId (i)
+  -- Populate companions by iterating the centralized CompanionDefs table (non-breaking)
+  for key, def in pairs(addon.CompanionDefs) do
+    local i = def.defId
+    local cid = GetCompanionCollectibleId(i)
     if cid > 0 then
-      -- Unlocked does not mean what you'd think...
-      local name, _, _, _, unlocked, _, active = GetCollectibleInfo (cid)
-      local qid = GetCompanionIntroQuestId (i)
-      local introname, _ = GetCompletedQuestInfo (qid)
-      -- zo_callLater(function()
-      --  d(name .. " companiondefid " .. tostring(i) .. " unlocked: " .. tostring(unlocked))
-      --  d("  intro: ".. tostring(introname) .. ", questid: " .. tostring(qid))
-      --  end, 5)
+      local name, _, _, _, unlocked, _, active = GetCollectibleInfo(cid)
+      local qid = GetCompanionIntroQuestId(i)
+      local introname, _ = GetCompletedQuestInfo(qid)
       addon.Companions[i] = { id = cid, name = name, unlocked = unlocked,
         introdone = (introname ~= "" and true or false), active = active, nagplayer = true, rapport = 0 }
-      -- /script for i = 1,20 do n,_ = GetQuestName(GetCompanionIntroQuestId(i)); if n~="" then d(i.." questname="..n); end; end
-      local questname = GetQuestName (qid)
+      local questname = GetQuestName(qid)
       if questname ~= "" then
         addon.IntroQuests[questname] = i
       end
