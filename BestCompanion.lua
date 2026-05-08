@@ -321,12 +321,16 @@ function addon.getDesiredCompanionForInteraction(action, name)
   end
   if action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then return addon.GetCompanionDefId("MIRRI") end
   if action == "Use" and name == "Skyshard" then return addon.GetCompanionDefId("TANLORIN") end
+
   -- unsummon interaction list
   addon.unsummon = true
-      if action == "Collect" and GetActiveCompanionDefId() == addon.GetCompanionDefId("AZANDAR")
-        and (name == "Blue Entoloma" or name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot" or name == "Stinkhorn" or name == "White Cap")
-        then return addon.GetCompanionDefId("AZANDAR") end
-    if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
+  local azandarMushrooms = {
+    ["Blue Entoloma"] = true, ["Emetic Russula"] = true, ["Luminous Russula"] = true,
+    ["Namira's Rot"] = true, ["Stinkhorn"] = true, ["White Cap"] = true, }
+  if action == "Collect" and GetActiveCompanionDefId() == addon.GetCompanionDefId("AZANDAR") and azandarMushrooms[name] then
+    return addon.GetCompanionDefId("AZANDAR")
+  end
+  if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
     if action == "Examine" and addon.ShalidorBooks[name] ~= nil and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
     if action == "Open" and name:match ("^Mages Guild") and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
     if action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == addon.GetCompanionDefId("ISOBEL") then return addon.GetCompanionDefId("ISOBEL") end
