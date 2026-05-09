@@ -41,6 +41,63 @@ function addon.GetCompanionByKey(key)
   return addon.Companions[id]
 end
 
+-- Helper functions for interaction rules
+addon.InteractionPredicates = {
+  introDone = function(key)
+    local comp = addon.GetCompanionByKey(key)
+    return comp and comp.introdone
+  end,
+
+  companionActive = function(key)
+    return GetActiveCompanionDefId() == addon.GetCompanionDefId(key)
+  end,
+
+  notMoving = function()
+    return not IsPlayerMoving()
+  end,
+
+  onGround = function()
+    return not IsUnitInAir("player")
+  end,
+
+  nameMatches = function(name, pattern)
+    return type(name) == "string" and name:match(pattern) ~= nil
+  end,
+
+  isShalidorBook = function(name)
+    return addon.ShalidorBooks and addon.ShalidorBooks[name] ~= nil
+  end,
+}
+
+-- interaction mapping table from action/name to companion keys.
+addon.InteractionToCompanion = {
+  -- Example entry structure:
+  -- { action = "Dig", name = "Dirt Mound", companion = "SHARP", fallback = "MIRRI", conditions = { addon.InteractionPredicates.introDone } }
+}
+
+local function allConditionsMet(conditions, action, name)
+  if not conditions then return true end
+  for _, condition in ipairs(conditions) do
+    if not condition(action, name) then return false end
+  end
+  return true
+end
+
+function addon.MatchInteractionRule(rule, action, name)
+  if rule.action ~= action then return false end
+  if rule.name and rule.name ~= name then return false end
+  if rule.namePattern and not addon.InteractionPredicates.nameMatches(name, rule.namePattern) then return false end
+  return allConditionsMet(rule.conditions, action, name)
+end
+
+function addon.ResolveInteractionCompanion(rule)
+  local key = rule.companion
+  if rule.fallback and key and not addon.InteractionPredicates.introDone(key) then
+    key = rule.fallback
+  end
+  return key
+end
+
 function addon.prettyprint (ref, pre, post)
   if type (ref) == 'table' then
     local out = (pre or '') .. '{ '
