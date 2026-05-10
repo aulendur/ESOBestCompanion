@@ -71,8 +71,26 @@ addon.InteractionPredicates = {
 
 -- interaction mapping table from action/name to companion keys.
 addon.InteractionToCompanion = {
-  -- Example entry structure:
-  -- { action = "Dig", name = "Dirt Mound", companion = "SHARP", fallback = "MIRRI", conditions = { addon.InteractionPredicates.introDone } }
+  { action = "Dig", name = "Dirt Mound", companion = "SHARP", fallback = "MIRRI" },
+  { action = "Examine", name = "Alchemist Delivery Crate", companion = "TANLORIN" },
+  { action = "Examine", name = "Enchanter Delivery Crate", companion = "AZANDAR" },
+  { action = "Loot", name = "Psijic Portal", companion = "BASTIAN" },
+  { action = "Open", namePattern = "^Mages Guild", companion = "BASTIAN", conditions = { function() return addon.InteractionPredicates.introDone("BASTIAN") end } },
+  { action = "Open", namePattern = " Refuge$", companion = "EMBER", conditions = { function() return addon.InteractionPredicates.introDone("EMBER") end } },
+  { action = "Steal From", companion = "MIRRI", conditions = { function(_, name) return name == "Thieves Trove" or name == "Safebox" end, addon.InteractionPredicates.notMoving } },
+  { action = "Take", namePattern = "^Affix Script: |^Focus Script: |^Signature Script: ", companion = "TANLORIN" },
+  { action = "Talk", name = "Lyris Titanborn", companion = "ISOBEL" },
+  { action = "Unlock", name = "Chest", companion = "MIRRI", fallback = "TANLORIN", conditions = { addon.InteractionPredicates.onGround } },
+  { action = "Use", companion = "MIRRI", conditions = { addon.InteractionPredicates.onGround, function(_, name) return name == "Chest" or name == "Hidden Treasure" end } },
+  { action = "Use", name = "Skyshard", companion = "TANLORIN" },
+
+  { action = "Collect", companion = "AZANDAR", unsummon = true, conditions = { function(_, name) return name == "Blue Entoloma" or name == "Emetic Russula" or name == "Luminous Russula" or name == "Namira's Rot" or name == "Stinkhorn" or name == "White Cap" end, function() return addon.InteractionPredicates.companionActive("AZANDAR") end } },
+  { action = "Collect", name = "Nirnroot", companion = "TANLORIN", unsummon = true, conditions = { function() return addon.InteractionPredicates.companionActive("TANLORIN") end } },
+  { action = "Examine", companion = "TANLORIN", unsummon = true, conditions = { function(_, name) return addon.InteractionPredicates.isShalidorBook(name) and addon.InteractionPredicates.companionActive("TANLORIN") end } },
+  { action = "Open", namePattern = "^Mages Guild", companion = "TANLORIN", unsummon = true, conditions = { function() return addon.InteractionPredicates.companionActive("TANLORIN") end } },
+  { action = "Open", namePattern = " Refuge$", companion = "ISOBEL", unsummon = true, conditions = { function() return addon.InteractionPredicates.companionActive("ISOBEL") end } },
+  { action = "Travel", namePattern = "^Boat ", companion = "MIRRI", unsummon = true, conditions = { function() return addon.InteractionPredicates.companionActive("MIRRI") end } },
+  { action = "Take", companion = "MIRRI", unsummon = true, conditions = { function(_, name) return (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") and addon.InteractionPredicates.companionActive("MIRRI") end } },
 }
 
 local function allConditionsMet(conditions, action, name)
@@ -351,48 +369,16 @@ function addon.getDesiredCompanionForInteraction(action, name)
   if not action or not name then return nil end
 
   addon.unsummon = false
-  if action == "Dig" and name == "Dirt Mound" then
-    local sharp = addon.GetCompanionByKey("SHARP")
-    if sharp and sharp.introdone then return addon.GetCompanionDefId("SHARP") else return addon.GetCompanionDefId("MIRRI") end
+  for _, rule in ipairs(addon.InteractionToCompanion) do
+    if addon.MatchInteractionRule(rule, action, name) then
+      addon.unsummon = rule.unsummon or false
+      local companionKey = addon.ResolveInteractionCompanion(rule)
+      if companionKey then
+        return addon.GetCompanionDefId(companionKey)
+      end
+      return nil
+    end
   end
-  if action == "Examine" and name == "Alchemist Delivery Crate" then return addon.GetCompanionDefId("TANLORIN") end
-  if action == "Examine" and name == "Enchanter Delivery Crate" then
-    local az = addon.GetCompanionByKey("AZANDAR")
-    if az and az.introdone then return addon.GetCompanionDefId("AZANDAR") else return addon.GetCompanionDefId("TANLORIN") end
-  end
-  if action == "Loot" and name == "Psijic Portal" then return addon.GetCompanionDefId("BASTIAN") end
-  do -- Bastion open/mages guild check using helper with safety
-    local bast = addon.GetCompanionByKey("BASTIAN")
-    if action == "Open" and name:match ("^Mages Guild") and bast and bast.introdone then return addon.GetCompanionDefId("BASTIAN") end
-  end
-  do -- Ember check
-    local ember = addon.GetCompanionByKey("EMBER")
-    if action == "Open" and name:match (' Refuge$') and ember and ember.introdone then return addon.GetCompanionDefId("EMBER") end
-  end
-  if action == "Steal From" and (name == "Thieves Trove" or name == "Safebox") and not IsPlayerMoving() then return addon.GetCompanionDefId("MIRRI") end
-  if action == "Take" and (name:match ('^Affix Script: ') or name:match ('^Focus Script: ') or name:match ('^Signature Script: ')) then return addon.GetCompanionDefId("TANLORIN") end
-  if action == "Talk" and name == "Lyris Titanborn" then return addon.GetCompanionDefId("ISOBEL") end
-  if action == "Unlock" and name == "Chest" and not IsUnitInAir ("player") then
-    local mir = addon.GetCompanionByKey("MIRRI")
-    if mir and mir.introdone then return addon.GetCompanionDefId("MIRRI") else return addon.GetCompanionDefId("TANLORIN") end
-  end
-  if action == "Use" and (name == "Chest" or name == "Hidden Treasure") and not IsUnitInAir ("player") then return addon.GetCompanionDefId("MIRRI") end
-  if action == "Use" and name == "Skyshard" then return addon.GetCompanionDefId("TANLORIN") end
-
-  -- unsummon interaction list
-  addon.unsummon = true
-  local azandarMushrooms = {
-    ["Blue Entoloma"] = true, ["Emetic Russula"] = true, ["Luminous Russula"] = true,
-    ["Namira's Rot"] = true, ["Stinkhorn"] = true, ["White Cap"] = true, }
-  if action == "Collect" and GetActiveCompanionDefId() == addon.GetCompanionDefId("AZANDAR") and azandarMushrooms[name] then
-    return addon.GetCompanionDefId("AZANDAR")
-  end
-  if action == "Collect" and name == "Nirnroot" and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
-    if action == "Examine" and addon.ShalidorBooks[name] ~= nil and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
-    if action == "Open" and name:match ("^Mages Guild") and GetActiveCompanionDefId() == addon.GetCompanionDefId("TANLORIN") then return addon.GetCompanionDefId("TANLORIN") end
-    if action == "Open" and name:match (' Refuge$') and GetActiveCompanionDefId() == addon.GetCompanionDefId("ISOBEL") then return addon.GetCompanionDefId("ISOBEL") end
-    if action == "Travel" and name:match ('^Boat ') and GetActiveCompanionDefId() == addon.GetCompanionDefId("MIRRI") then return addon.GetCompanionDefId("MIRRI") end
-    if action == "Take" and GetActiveCompanionDefId() == addon.GetCompanionDefId("MIRRI") and (name == "Butterfly" or name == "Torchbug" or name == "Worker Bee") then return addon.GetCompanionDefId("MIRRI") end
 
   return nil
 end
